@@ -1,4 +1,5 @@
-* François alias Flash
+François Boiteux
+----------------
 
 Étudiant à EPITA en 2ème année de cycle préparatoire je décide cette année pour
 le projet libre du second semestre de rejoindre un groupe de projet qui
