@@ -1,1 +1,2 @@
-Ny Little Cluster
+%Cahier des charges : My Little Cluster
+%Cluster team
