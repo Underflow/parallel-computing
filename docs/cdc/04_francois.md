@@ -14,4 +14,4 @@ Je m'occuperais de la partie serveur du projet ce qui me permettera d'en
 apprendre certainement plus sur les sockets et les fonctionnements
 server/client. 
 
-![boiteu_f](./images/boiteu_f.jpg")
+![boiteu_f](./images/boiteu_f.jpeg")
