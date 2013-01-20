@@ -1,22 +1,20 @@
 Etat de l'art
 ==========================
 
-Les premiers ordinateurs étaient séquentiels, exécutant les instructions l'une après l'autre. Le parallélisme se manifeste actuellement de plusieurs manières : en juxtaposant plusieurs processeurs séquentiels ou en exécutant simultanément des instructions indépendantes.
-
-Différents types de parallélisme : la taxinomie de Flynn
---------------------------------------------------------
-
-La taxinomie de Flynn, proposée par l'américain Michael J. Flynn est l'un des premiers systèmes de classification des ordinateurs créés. Les programmes et les architectures sont classés selon le type d'organisation du flux de données et du flux d'instructions.
+Nous citerons ici la description d'un des projet de "Network Computing" appelé BOINC. Il existe toutefois d'autres projets de supercomputing dans le monde.
 
 
-*Les machines les plus simples traitent une donnée à la fois : ces systèmes sont dits « séquentiels ». Ce type de fonctionnement était prédominant pour les ordinateurs personnels jusqu'à la fin des années 1990. On parle d'architectures SISD (Single Instruction, Single Data).
-*Les systèmes traitant de grandes quantités de données d'une manière uniforme ont intérêt à être des SIMD (Single Instruction, Multiple Data) ; c'est typiquement le cas des processeurs vectoriels ou des unités de calcul gérant le traitement du signal comme la vidéo ou le son.
-*Les systèmes utilisant plusieurs processeurs ou un processeur multi-cœur sont plus polyvalents et pleinement parallèles, ce sont des MIMD (Multiple Instructions, Multiple Data).
-*Le type MISD a été beaucoup plus rarement utilisé, il semble néanmoins adapté à certains problèmes comme les réseaux neuronaux et aux problèmes temps-réel liés. L'architecture appelée Systolic array est un type d'architecture MISD.
+BOINC
+-----
 
-Efficacité du parallélisme
---------------------------
+BOINC est l'acronyme de Berkeley Open Infrastructure for Network Computing (Infrastructure non propriétaire de Berkeley dédiée au calcul en réseau).
+BOINC est une plate-forme de calcul partagé. C'est donc un programme qui permet de faire participer des volontaires à des projets scientifiques susceptibles de faire avancer la science dans différents domaines tels que la médecine, l'astronomie, la physique ou les mathématiques.
 
-![Loi de Amdahl's](./images/amdahl.png)
+BOINC a une puissance totale moyenne de calcul d'environ 6,5 PFLOPS repartie sur environ 800 000 ordinateurs en septembre 2012 (pour comparaison, le supercalculateur le plus puissant à la même époque est le Sequoia d'IBM, qui atteint une puissance de 16,324 PFLOPS).
 
-Représentation graphique de la loi d'Amdahl. L'accélération du programme par la parallélisation est limitée par le nombre d'exécutions parallèles possible au sein de l'algorithme. Par exemple, si un programme peut être parallélisé à 90 %, l'accélération maximale théorique sera de x 10, quel que soit le nombre de processeurs utilisés.
+Principe de fonctionnement 
+-------------------------
+
+La plate-forme BOINC suit un modèle simple : chaque projet s'étend sur un serveur central qui exécute une application Master. Les applications sont réparties sur des milliers de petites tâches qui sont envoyées à des machines réparties sur l'Internet, où ils exécutent des applications de type travailleurs. Il n'y a pas de communication entre les travailleurs. Toutes les communications doivent être du travailleur au Maitre, afin de permettre la traversée de NAT et pare-feu. Les applications BOINC sont donc limitées au modèle Master/worker, avec un serveur central chargé de distribuer le travail aux clients BOINC. BOINC suit un protocole de réseau simple, qui demande aux clients d'initier toutes les communications (problèmes de NAT/pare-feu) et de communiquer avec le serveur à chaque fois qu'un client demande plus de travail. Chaque fois qu'un client est inactif et décide d'exécuter plus de travail, il doit contacter le serveur principal trois fois.
+
+![Protocole réseau](./images/Protocol.png)
