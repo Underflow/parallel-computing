@@ -2,7 +2,7 @@ Calcul distribué en réseau
 ==========================
 
 Computer cluster
-----------------
+---------------
 
 Ce terme va jouer un grand rôle dans notre projet, c'est pourquoi nous allons définir maintenant ce qu'on nous désignons par celui-ci. 
 
