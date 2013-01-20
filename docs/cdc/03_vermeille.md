@@ -1,4 +1,4 @@
-Guillaume Sanchez
+Guillaume "Vermeille" Sanchez
 -----------------
 
 Je suis fasciné par l'intelligence artificielle, et plus généralement les
@@ -11,3 +11,5 @@ Haskell, langage dont la beauté n'a d'égal qu'une biflle surprise au clair de
 lune. Comment donc répartir intelligemment un calcul, l'ayant préalablement
 découpé en composantes fonctionnelles pures ? Voilà la question que je vois au
 travers de ce projet.
+
+![Guillaume Sanchez](images/vermeille.jpg)

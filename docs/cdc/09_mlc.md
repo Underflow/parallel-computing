@@ -50,6 +50,37 @@ L'architecture système du dispatcher est beaucoup moins stricte que celle des
 noeuds de calcul : il n'est pas en soit un goulot d'étranglement pour la
 vitesse de calcul et il n'y en a qu'un seul par cluster.
 
-Nous développerons donc un dispatcher fonctionnant sur LInux. Il offrira la
+Nous développerons donc un dispatcher fonctionnant sur Linux. Il offrira la
 possibilité de sauvegarder les tâches déja calculées pour reprendre le calcul
 en cas d'interruption.
+
+Schedulding des tâches
+----------------------
+
+Le dispatcher tiendra à jour une liste des tâches.
+
+Nous penchons pour l'instant sur une liste circulaire. Cette liste comprendra
+un nombre statique de tâches et sera remplie au fur et à mesure. A chaque fois
+qu'une tâche est distribuée, nous passerons à la suivante. Cela permet, si un
+noeud ne répond pas, de réattribuer la tâche plus tard.
+
+Protocole réseau
+----------------
+
+Nous utiliserons un protocole qui ne permet pas de communication entre les
+noeuds pour faciliter le schedulding des tâches.
+
+Le dispatcher contrôlera l'ensemble des nodes et pourra les faire rebooter,
+suivre leur activité.
+
+Il s'occupera de distribuer les tâches à chaque fois qu'un noeud lui demande.
+
+Lorsqu'un noeud est inactif, il demandera une tâche via un packet réseau, et le 
+dispatcher répondra en envoyant une tâche à effectuer et des paramètres pour
+l'execution. Une fois le résultat calculé il remontera le résultat au
+dispatcher et le noeud sera à nouveau considéré comme inactif (voir les
+spéficitations détaillées du protocole).
+
+
+
+![Spécifications du procole de communication (draft)](images/protocol.jpg)
