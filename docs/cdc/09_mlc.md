@@ -59,10 +59,19 @@ Schedulding des tâches
 
 Le dispatcher tiendra à jour une liste des tâches.
 
-Nous penchons pour l'instant sur une liste circulaire. Cette liste comprendra
-un nombre statique de tâches et sera remplie au fur et à mesure. A chaque fois
-qu'une tâche est distribuée, nous passerons à la suivante. Cela permet, si un
-noeud ne répond pas, de réattribuer la tâche plus tard.
+Nous penchons pour l'instant sur un round robin avec une simple liste 
+circulaire. Cette liste comprendra un nombre statique de tâches et sera 
+remplie au fur et à mesure. A chaque fois qu'une tâche est distribuée, nous 
+passerons à la suivante. Cela permet, si un noeud ne répond pas, de 
+réattribuer la tâche plus tard.
+
+Lorsque le dispatcher reçoit un résultat, il enlève la tâche correspondante de
+la liste et il ajoute à la "fin" de la liste circulaire (c'est à dire juste 
+avant l'élement pointé) une nouvelle tâche qui sera distribuée prochainement.
+
+Ce schedulding est minimaliste et servira de "prototype". Nous nous réservons
+la possibilité de le faire évoluer pour gagner en performance en rajoutant
+nottament des options de timeout et de priorité d'execution.
 
 Protocole réseau
 ----------------
@@ -80,7 +89,5 @@ dispatcher répondra en envoyant une tâche à effectuer et des paramètres pour
 l'execution. Une fois le résultat calculé il remontera le résultat au
 dispatcher et le noeud sera à nouveau considéré comme inactif (voir les
 spéficitations détaillées du protocole).
-
-
 
 ![Spécifications du procole de communication (draft)](images/protocol.jpg)
