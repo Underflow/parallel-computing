@@ -9,11 +9,10 @@ int main(int argc,char *argv[])
     // Send DATA Model    
     struct block
     {
-        uint8_t client_id;
-        char cluster_id;
-        char opcode;
-        uint8_t size_of;
-        char *data;
+        uint8_t client_id[8];
+        uint8_t cluster_id;
+        uint8_t opcode;
+        uint8_t size_of_data[8];
     }__attribute__((packed));
     struct block *test;
 
@@ -25,18 +24,11 @@ int main(int argc,char *argv[])
 
     if(argc==1)
     {
-        test->client_id=00035;
-        test->cluster_id='c';
-        test->opcode='a';
-        test->data = malloc(10*sizeof(test->data));
-        test->data ="azert";
-
-        char *str=malloc(10*sizeof(*str));
-        str="coucoucoucououccoucocucocucocucoucocucocuocuccuoccouu";
-        printf("%d\n",sizeof(str));
-        test->size_of=sizeof(test);
-        printf("%u\n",sizeof(test->data));
-
+        test->client_id[0]=00035;
+        test->cluster_id=00030;
+        test->opcode=00036;
+        test->size_of_data[0]=50;
+        
         file=fopen("struct_test","wb");
         fwrite(test,sizeof(struct block),1,file);
         fclose(file);
@@ -51,7 +43,7 @@ int main(int argc,char *argv[])
         }
         fread(test, sizeof(struct block), 1, file);
         fclose(file);
-        printf("%d",test->size_of);
+        printf("%d",test->size_of_data[0]);
     }
     /*else
         printf("Argument 1 faux , read ou write\n");
