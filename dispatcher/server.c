@@ -17,41 +17,39 @@ static const char MESSAGE[]="Hello, World!\n";
 
 static const int PORT = 9995;
 static void listener_cb(struct evconnlistener *, evutil_socket_t,
-    struct sockaddr *, int socklen, void *);
+                        struct sockaddr *, int socklen, void *);
 static void conn_writecb(struct bufferevent *, void *);
 static void conn_eventcb(struct bufferevent *, short, void *);
 static void signal_cb(evutil_socket_t, short, void *);
 
 // Send DATA Model    
-    struct mlc_packet_header
-    {
-        uint8_t client_id[8];
-        uint8_t cluster_id;
-        uint8_t opcode;
-        uint8_t size_of[8];
-    }__attribute__((packed));
+struct mlc_packet_header
+{
+    uint8_t client_id[8];
+    uint8_t cluster_id;
+    uint8_t opcode;
+    uint8_t size_of[8];
+}__attribute__((packed));
 
 
 
 int main()
 {
-    
-    struct mlc_packet_header *new,*test;
+
+    struct mlc_packet_header *new;
     struct event_base *base;
     struct evconnlistener *listener;
     struct event *signal_event;
     struct sockaddr_in sin;
-   
+
     new=malloc(sizeof(struct mlc_packet_header)); 
     new->client_id[0]=12;
     new->cluster_id=10;
     new->opcode=5;
-    new->size_of[0]=10;
-    
-    char *str=(char*)new;
-    test=(struct mlc_packet_header*)str;
+    new->size_of[0]=100;
 
-   base = event_base_new();
+    char *str=(char*)new;
+    base = event_base_new();
     if (!base) {
         fprintf(stderr, "Could not initialize libevent!\n");
         return 1;
@@ -61,11 +59,10 @@ int main()
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
 
-#include <signal.h>
-    listener = evconnlistener_new_bind(base, listener_cb, (void *)base,
-        LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
-        (struct sockaddr*)&sin,
-        sizeof(sin));
+    listener = evconnlistener_new_bind(base, listener_cb, str,
+                                       LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
+                                       (struct sockaddr*)&sin,
+                                       sizeof(sin));
 
     if (!listener) {
         fprintf(stderr, "Could not create a listener!\n");
@@ -86,15 +83,15 @@ int main()
     event_base_free(base);
 
     printf("done\n"); 
-    
+
     return 0;
 }
 
 static void
 listener_cb(struct evconnlistener *listener, evutil_socket_t fd,
-    struct sockaddr *sa, int socklen, void *user_data)
+            struct sockaddr *sa, int socklen, void *user_data)
 {
-    struct event_base *base = user_data;
+    struct event_base *base = evconnlistener_get_base(listener);
     struct bufferevent *bev;
 
     bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
@@ -106,8 +103,7 @@ listener_cb(struct evconnlistener *listener, evutil_socket_t fd,
     bufferevent_setcb(bev, NULL, conn_writecb, conn_eventcb, NULL);
     bufferevent_enable(bev, EV_WRITE);
     bufferevent_disable(bev, EV_READ);
-
-    bufferevent_write(bev,MESSAGE , strlen(MESSAGE));
+    bufferevent_write(bev,(char*)user_data, 18);
 }
 
 static void
@@ -127,11 +123,11 @@ conn_eventcb(struct bufferevent *bev, short events, void *user_data)
         printf("Connection closed.\n");
     } else if (events & BEV_EVENT_ERROR) {
         printf("Got an error on the connection: %s\n",
-            strerror(errno));/*XXX win32*/
+               strerror(errno));/*XXX win32*/
     }
     /* None of the other events can happen here, since we haven't enabled
      * timeouts */
-bufferevent_free(bev);
+    bufferevent_free(bev);
 }
 
 static void
