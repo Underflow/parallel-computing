@@ -25,8 +25,8 @@ static void signal_cb(evutil_socket_t, short, void *);
 // Send DATA Model    
 struct mlc_packet_header
 {
-    uint8_t client_id[8];
-    uint8_t cluster_id;
+    char client_id[8];
+    char cluster_id;
     uint8_t opcode;
     uint8_t size_of[8];
 }__attribute__((packed));
@@ -43,10 +43,10 @@ int main()
     struct sockaddr_in sin;
 
     new=malloc(sizeof(struct mlc_packet_header)); 
-    new->client_id[0]=12;
+    new->client_id[0]='1';
     new->cluster_id=10;
     new->opcode=5;
-    new->size_of[0]=100;
+    new->size_of[0]='1';
 
     char *str=(char*)new;
     base = event_base_new();
