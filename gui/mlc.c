@@ -10,15 +10,19 @@ int main ()
     initscr();
     start_color();
     keypad(stdscr, TRUE);
+    cbreak();
 
-    win_logs = newwin(LINES, COLS / 2, 0, 0);
+    move(5, 5);
+    vline('│', 0);
+
+    refresh();
+
+    /*win_logs = newwin(LINES, COLS / 2, 0, 0);
     init_pair(1, COLOR_WHITE, COLOR_BLUE);
     wattron(win_logs, COLOR_PAIR(1));
-    box(win_logs, 0, 0);
     wprintw(win_logs, "Test\n");
     wrefresh(win_logs);
-    wattroff(win_logs, COLOR_PAIR(1));
-    refresh();
+    wattroff(win_logs, COLOR_PAIR(1));*/
 
     /*while (true)
     {
@@ -51,7 +55,11 @@ int main ()
     noecho();
     refresh();*/
 
-    getch();
+    while (getch() != KEY_ESCAPE)
+    {
+    }
+
+    //getch();
     endwin();
 
     return 0;
