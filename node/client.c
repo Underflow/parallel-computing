@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,37 +20,97 @@ struct mlc_packet_header
 }__attribute__((packed));
 
 
+char *substr(char *src,int pos,int len) 
+{ 
+  char *dest=NULL;                        
+  if (len>0) 
+  {                  
+    dest = calloc(len+1, 1);      
+    if(NULL != dest) 
+        strncat(dest,src+pos,len);            
+    
+  }                                       
+  return dest;      
+} 
+
+void proceed_task(char *buffer)
+{
+    struct mlc_packet_header *header;
+    header = (struct mlc_packet_header*)
+        substr(buffer, 0, sizeof(struct mlc_packet_header));
+    char *data = substr(buffer,sizeof(struct mlc_packet_header), strlen(buffer)-sizeof(struct mlc_packet_header));
+    
+    printf("Traitement ...\n");
+    // Affichage de la struct
+    printf("Client_id : %f\n",header->client_id);
+    printf("CLuster_id : %d\n",header->cluster_id);
+    printf("Opcode : %d\n",header->opcode);
+    printf("Size_of : %d\n",header->size_of);
+
+    // Affichage de la data;
+    printf("Data : %s\n\n",data);
+
+
+    // Vide entièrement le buffer une fois que la tâche a été effectuer
+    memset(&buffer[0], 0, sizeof(buffer));
+
+}
+
 int main(int argc , char *argv[])
 {
+    ;
+    if(argc != 3)
+    {
+        printf("Argument 1 : IP\n");
+        printf("Argument 2 : PORT\n");
+        return 0;
+    }
+
+    char *server_ip = argv[1];
+    int server_port = atoi(argv[2]);
+
     int sock;
+    char buffer_rec[1024];
+    char buffer_ask[1024];
     struct sockaddr_in server;
+    struct mlc_packet_header header;
+
+
+
 
     sock = socket(AF_INET , SOCK_STREAM , 0);
-    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_addr.s_addr = inet_addr(server_ip);
     server.sin_family = AF_INET;
-    server.sin_port = htons(9995);
+    server.sin_port = htons(server_port);
 
-    connect(sock , (struct sockaddr *)&server , sizeof(server));
-    char *data="BLABLABLA";
-    struct mlc_packet_header header;
-    header.client_id = 42;
-    header.opcode = 2;
-    header.cluster_id = 10;
-    header.size_of = sizeof(struct mlc_packet_header) + strlen(data);
-    printf("%d:%d\n", sizeof(struct mlc_packet_header), header.size_of);
-    send(sock, (char*)&header, sizeof(struct mlc_packet_header), 1);
-    send(sock, data, strlen(data), 1);
-    /*
-    recv(sock , server_reply , 18 , 0);
-    test=(struct mlc_packet_header*)server_reply;
-   
+    if(connect(sock , (struct sockaddr *)&server , sizeof(server) == -1))
+    {
+        printf("Le serveur n'a pas réussi à être atteint :\n    IP : %s\n    PORT : %d\n", server_ip, server_port);
+        return 0;
+    }
 
-    // RECEPTION DE LA STRUCTURE 
-    printf("Client_id : %X\n",test->client_id);
-    printf("CLuster_id : %d\n",test->cluster_id);
-    printf("Opcode : %d\n",test->opcode);
-    printf("Size_of : %d\n",test->size_of);
-    */
+    strcpy(buffer_ask, "blablabla");
+    header.client_id = 1;
+    header.cluster_id = 2;
+    header.opcode = 3;
+    header.size_of = 4;
+
+    // Boucle tant que 1, à l'avenir paramètre à changer jusqu'à ce qu'il
+    // recoive l'odre de s'arreter.
+
+    while(1)
+    {
+
+        printf("Demande de tâches ...\n");
+        send(sock, (char*)&header, sizeof(struct mlc_packet_header), 0);
+        send(sock, buffer_ask, strlen(buffer_ask), 0);
+
+        if(recv(sock, buffer_rec, sizeof(buffer_rec), MSG_DONTWAIT) > 0)
+            proceed_task(buffer_rec);
+        else
+            sleep(20);
+    }
+
     return 0;
 }
 
