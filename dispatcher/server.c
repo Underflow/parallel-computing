@@ -13,41 +13,18 @@
 #include <string.h>
 #include <signal.h>
 
-static const char MESSAGE[]="Hello, World!\n";
+#include "server.h"
+#include "packet.h"
 
 static const int PORT = 9995;
-static void listener_cb(struct evconnlistener *, evutil_socket_t,
-                        struct sockaddr *, int socklen, void *);
-static void conn_writecb(struct bufferevent *, void *);
-static void conn_eventcb(struct bufferevent *, short, void *);
-static void signal_cb(evutil_socket_t, short, void *);
-
-// Send DATA Model    
-struct mlc_packet_header
-{
-    char client_id[8];
-    char cluster_id;
-    uint8_t opcode;
-    uint8_t size_of[8];
-}__attribute__((packed));
-
-
 
 int main()
 {
-
-    struct mlc_packet_header *new;
     struct event_base *base;
     struct evconnlistener *listener;
     struct event *signal_event;
     struct sockaddr_in sin;
-
-    new=malloc(sizeof(struct mlc_packet_header)); 
-    new->client_id[0]='1';
-    new->cluster_id=10;
-    new->opcode=5;
-    new->size_of[0]='1';
-
+    
     char *str=(char*)new;
     base = event_base_new();
     if (!base) {
@@ -59,7 +36,7 @@ int main()
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
 
-    listener = evconnlistener_new_bind(base, listener_cb, str,
+    listener = evconnlistener_new_bind(base, listener_connection_event, str,
                                        LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
                                        (struct sockaddr*)&sin,
                                        sizeof(sin));
@@ -69,7 +46,7 @@ int main()
         return 1;
     }
 
-    signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base);
+    signal_event = evsignal_new(base, SIGINT, close_event, (void *)base);
 
     if (!signal_event || event_add(signal_event, NULL)<0) {
         fprintf(stderr, "Could not create/add a signal event!\n");
@@ -87,9 +64,18 @@ int main()
     return 0;
 }
 
-static void
-listener_cb(struct evconnlistener *listener, evutil_socket_t fd,
-            struct sockaddr *sa, int socklen, void *user_data)
+
+
+/*
+** Callback de connection du listener
+** Cette méthode est appélée lorsqu'un client se connecte au serveur (i.e : 
+** quand le listener reçoit une connection).
+*/
+void listener_connection_event(struct evconnlistener *listener,
+                               evutil_socket_t fd,
+                               struct sockaddr *sa,
+                               int socklen,
+                               void *user_data)
 {
     struct event_base *base = evconnlistener_get_base(listener);
     struct bufferevent *bev;
@@ -100,24 +86,45 @@ listener_cb(struct evconnlistener *listener, evutil_socket_t fd,
         event_base_loopbreak(base);
         return;
     }
-    bufferevent_setcb(bev, NULL, conn_writecb, conn_eventcb, NULL);
+    bufferevent_setcb(bev, NULL, write_event, client_connection_event, NULL);
     bufferevent_enable(bev, EV_WRITE);
     bufferevent_disable(bev, EV_READ);
     bufferevent_write(bev,(char*)user_data, 18);
 }
 
-static void
-conn_writecb(struct bufferevent *bev, void *user_data)
+
+/* 
+** Callback d'écriture
+** Cette fonction est appelée lorsque le serveur envoie des données à un
+** client.
+*/
+void write_event(struct bufferevent *bev, void *user_data)
 {
     struct evbuffer *output = bufferevent_get_output(bev);
     if (evbuffer_get_length(output) == 0) {
-        printf("flushed answer\n");
         bufferevent_free(bev);
     }
 }
 
-static void
-conn_eventcb(struct bufferevent *bev, short events, void *user_data)
+/*
+** Callback de lecture
+** Cette méthode est appélée lorsque le serveur reçoit les données d'un des
+** clients.
+*/
+
+void read_event(struct bufferevent *bev, void *user_data)
+{
+
+}
+
+/*
+** Callback de connection des clients
+** Cette méthode est appelée lorsqu'un événement se produit concernant la
+** connection des clients connectés
+*/
+void client_connection_event(struct bufferevent *bev,
+                             short events,
+                             void *user_data)
 {
     if (events & BEV_EVENT_EOF) {
         printf("Connection closed.\n");
@@ -130,13 +137,15 @@ conn_eventcb(struct bufferevent *bev, short events, void *user_data)
     bufferevent_free(bev);
 }
 
-static void
-signal_cb(evutil_socket_t sig, short events, void *user_data)
+
+/*
+** Callback de fermeture du serveur
+** Cette méthode est appelée à la fermeture du serveur.
+*/
+void close_event(evutil_socket_t sig, short events, void *user_data)
 {
     struct event_base *base = user_data;
     struct timeval delay = { 2, 0 };
-
-    printf("Caught an interrupt signal; exiting cleanly in two seconds.\n");
-
+    printf("Exiting server : 2 sec");
     event_base_loopexit(base, &delay);
 }
