@@ -19,6 +19,9 @@ struct mlc_packet_header
     int size_of;
 }__attribute__((packed));
 
+/*
+** Fonction de découpe (substring)
+*/
 
 char *substr(char *src,int pos,int len) 
 { 
@@ -36,8 +39,12 @@ char *substr(char *src,int pos,int len)
 void proceed_task(char *buffer)
 {
     struct mlc_packet_header *header;
+
+    // Decoupe du header et cast en structure
     header = (struct mlc_packet_header*)
         substr(buffer, 0, sizeof(struct mlc_packet_header));
+
+    // Decoupe du data et cast en char*
     char *data = substr(buffer,sizeof(struct mlc_packet_header), strlen(buffer)-sizeof(struct mlc_packet_header));
     
     printf("Traitement ...\n");
@@ -56,9 +63,16 @@ void proceed_task(char *buffer)
 
 }
 
+/* 
+** Pour trasnformer le client en bibliothèque il suffirat de 
+** donner 2 arguments à cette fonctions : 
+** - IP du serveur
+** - Port à utiliser
+*/
+
 int main(int argc , char *argv[])
 {
-    ;
+
     if(argc != 3)
     {
         printf("Argument 1 : IP\n");
@@ -89,6 +103,10 @@ int main(int argc , char *argv[])
         return 0;
     }
 
+
+    // La structure ainsi que la data pour demander une tâche est
+    // constamment la même, ici c'est un test qui est fait
+
     strcpy(buffer_ask, "blablabla");
     header.client_id = 1;
     header.cluster_id = 2;
@@ -96,7 +114,9 @@ int main(int argc , char *argv[])
     header.size_of = 4;
 
     // Boucle tant que 1, à l'avenir paramètre à changer jusqu'à ce qu'il
-    // recoive l'odre de s'arreter.
+    // recoive l'odre de s'arreter. Il y a un timeout de 20 secondes si le
+    // serveur n'envoie rien. Il faudrait insérer un timeout de 20 secondes à
+    // la place du sleep(20) mais ce n'est pas standart.
 
     while(1)
     {
@@ -109,6 +129,7 @@ int main(int argc , char *argv[])
             proceed_task(buffer_rec);
         else
             sleep(20);
+            
     }
 
     return 0;
