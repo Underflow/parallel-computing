@@ -3,7 +3,6 @@ void listener_connection_event(struct evconnlistener *listener,
                                struct sockaddr *sa,
                                int socklen,
                                void *user_data);
-void write_event(struct bufferevent *bev, void *user_data);
 void read_event(struct bufferevent *bev, void *user_data);
 void client_connection_event(struct bufferevent *bev,
                              short events,

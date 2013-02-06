@@ -12,10 +12,10 @@
 // Send DATA Model
 struct mlc_packet_header
 {
-    uint8_t client_id[8];
+    double client_id;
     uint8_t cluster_id;
     uint8_t opcode;
-    uint8_t size_of[8];
+    int size_of;
 }__attribute__((packed));
 
 
@@ -23,11 +23,6 @@ int main(int argc , char *argv[])
 {
     int sock;
     struct sockaddr_in server;
-    struct mlc_packet_header *test;
-
-    test=malloc(sizeof(struct mlc_packet_header)); 
-    
-    char server_reply[2000];
 
     sock = socket(AF_INET , SOCK_STREAM , 0);
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -35,16 +30,26 @@ int main(int argc , char *argv[])
     server.sin_port = htons(9995);
 
     connect(sock , (struct sockaddr *)&server , sizeof(server));
+    char *data="BLABLABLA";
+    struct mlc_packet_header header;
+    header.client_id = 42;
+    header.opcode = 2;
+    header.cluster_id = 10;
+    header.size_of = sizeof(struct mlc_packet_header) + strlen(data);
+    printf("%d:%d\n", sizeof(struct mlc_packet_header), header.size_of);
+    send(sock, (char*)&header, sizeof(struct mlc_packet_header), 1);
+    send(sock, data, strlen(data), 1);
+    /*
     recv(sock , server_reply , 18 , 0);
     test=(struct mlc_packet_header*)server_reply;
    
 
     // RECEPTION DE LA STRUCTURE 
-    printf("Client_id : %d\n",test->client_id[0]);
+    printf("Client_id : %X\n",test->client_id);
     printf("CLuster_id : %d\n",test->cluster_id);
     printf("Opcode : %d\n",test->opcode);
-    printf("Size_of : %d\n",test->size_of[0]);
-
+    printf("Size_of : %d\n",test->size_of);
+    */
     return 0;
 }
 

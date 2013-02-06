@@ -25,7 +25,6 @@ int main()
     struct event *signal_event;
     struct sockaddr_in sin;
     
-    char *str=(char*)new;
     base = event_base_new();
     if (!base) {
         fprintf(stderr, "Could not initialize libevent!\n");
@@ -36,7 +35,7 @@ int main()
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
 
-    listener = evconnlistener_new_bind(base, listener_connection_event, str,
+    listener = evconnlistener_new_bind(base, listener_connection_event, NULL,
                                        LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
                                        (struct sockaddr*)&sin,
                                        sizeof(sin));
@@ -64,6 +63,13 @@ int main()
     return 0;
 }
 
+/*
+** Cette méthode traite les données reçues après formatage.
+*/
+void handle_packet(struct mlc_packet_header header, char* data, struct bufferevent *bev)
+{
+    printf("Packet recu -  size_of : %d", header.size_of);
+}
 
 
 /*
@@ -86,35 +92,50 @@ void listener_connection_event(struct evconnlistener *listener,
         event_base_loopbreak(base);
         return;
     }
-    bufferevent_setcb(bev, NULL, write_event, client_connection_event, NULL);
-    bufferevent_enable(bev, EV_WRITE);
-    bufferevent_disable(bev, EV_READ);
-    bufferevent_write(bev,(char*)user_data, 18);
+    bufferevent_setcb(bev, read_event, NULL, client_connection_event, NULL);
+    bufferevent_enable(bev, EV_READ);
 }
 
 
-/* 
-** Callback d'écriture
-** Cette fonction est appelée lorsque le serveur envoie des données à un
-** client.
-*/
-void write_event(struct bufferevent *bev, void *user_data)
-{
-    struct evbuffer *output = bufferevent_get_output(bev);
-    if (evbuffer_get_length(output) == 0) {
-        bufferevent_free(bev);
-    }
-}
 
 /*
 ** Callback de lecture
 ** Cette méthode est appélée lorsque le serveur reçoit les données d'un des
 ** clients.
 */
-
 void read_event(struct bufferevent *bev, void *user_data)
 {
-
+    printf("Données recues \n");
+    struct evbuffer *buffer = bufferevent_get_input(bev);
+    // On regarde si on a reçu au moins le header
+    printf("Sizeof(struct) :: length - %d::%d",sizeof(struct mlc_packet_header), evbuffer_get_length(buffer));
+    if(evbuffer_get_length(buffer) >= sizeof(struct mlc_packet_header))
+    {
+        struct mlc_packet_header header;
+        // Le header est complet, on l'extrait
+        evbuffer_copyout(buffer, (void*)&header, sizeof(struct mlc_packet_header));
+        // On regarge la taille des données dans le header afin de déterminer
+        //si la totalité des données ont été reçues
+        if(evbuffer_get_length(buffer) >= header.size_of)
+        {
+            size_t data_size = header.size_of - sizeof(struct mlc_packet_header);
+            char *data = malloc(data_size);
+            // On supprime le header du buffer
+            evbuffer_drain(buffer, sizeof(struct mlc_packet_header));
+            // On extrait les données du buffer
+            evbuffer_remove(buffer, (void*)data, data_size); 
+            // On traite le packet reçu, complet
+            handle_packet(header, data, bev);
+        }
+        else
+        {
+            printf("Data incomplet\n");
+        }
+    }
+    else
+    {
+        printf("Header incomplet\n");
+    }
 }
 
 /*
@@ -146,6 +167,6 @@ void close_event(evutil_socket_t sig, short events, void *user_data)
 {
     struct event_base *base = user_data;
     struct timeval delay = { 2, 0 };
-    printf("Exiting server : 2 sec");
+    printf("Exiting server : 2 sec.\n");
     event_base_loopexit(base, &delay);
 }
