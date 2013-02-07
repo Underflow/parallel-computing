@@ -10,7 +10,7 @@ struct mlc_packet_header
     int size_of;
 }__attribute__((packed));
 
-void send_packet(char cluster_id,
+void send_packet(uint8_t cluster_id,
                   uint8_t opcode,
                   char *data,
                   int size_of,
