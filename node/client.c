@@ -73,7 +73,7 @@ void proceed_task(char *buffer)
     */
 }
 
-void rec_buffer(int socket,struct buffer_rec b)
+/*void rec_buffer(int socket,struct buffer_rec b)
 {
     char *temp;
     size_t n = 0;
@@ -87,7 +87,7 @@ void rec_buffer(int socket,struct buffer_rec b)
 
 
     }
-}
+}*/
 
 /*
 ** Pour trasnformer le client en bibliothèque il suffirat de 
@@ -99,19 +99,18 @@ void rec_buffer(int socket,struct buffer_rec b)
 int main(int argc , char *argv[])
 {
 
-    if(argc != 3)
+    if(argc != 2)
     {
         printf("Argument 1 : IP\n");
-        printf("Argument 2 : PORT\n");
         return 0;
     }
 
     char *server_ip = argv[1];
-    int server_port = atoi(argv[2]);
+    int server_port = 4242;
 
     int sock;
     char buffer_ask[1024];
-
+    char buffer_rec[1024];
 
     struct sockaddr_in server;
     struct mlc_packet_header header;
@@ -145,7 +144,8 @@ int main(int argc , char *argv[])
     // recoive l'odre de s'arreter. 
     while(1)
     {
-
+        for(int i=0;i<1024;i++)
+            buffer_rec[i]=0;
 
         sleep(1);
 
@@ -153,7 +153,9 @@ int main(int argc , char *argv[])
         send(sock, (char*)&header, sizeof(struct mlc_packet_header), 0);
         send(sock, buffer_ask, strlen(buffer_ask), 0);
 
-        rec_buffer(sock,buffer);
+        /*rec_buffer(sock,buffer);*/
+        if(recv(sock,buffer_rec,1024,0) > 0 )
+            proceed_task(buffer_rec);
     }
 
     return 0;
