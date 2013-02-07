@@ -3,83 +3,92 @@
 #include <string.h>
 
 //Maximal size of the list
-const unsigned int SIZE = 100;
+#define SIZE 100
 
 //Struct of the list
 // bd : taille de la liste
 // bg : tache pointee
+
+//Todo : Rajouter size à l'interieur de la struct
+// Initialiser size dans init_list
 typedef struct s_list *list;
 struct s_list
 {
-	char *tasks[100];
-	int bg, bd;
+    char *tasks[SIZE];
+    int curr_pos;
 };
 
 //Initialise the list
 void init_list(list l)
 {
-	l->bg = l->bd = 0;
+    l->curr_pos = -1;
+    int i;
+    for(i = 0; i < SIZE; i++)
+        l->tasks[i] = NULL;
 }
 
 //Inserts data at the end of list l
-void insert(char *data, list l)
+int insert(int pos, char *data, list l)
 {
-	if(l->bd < SIZE)
-	{
-		l->tasks[l->bd++] = data;
-	}
+    if(pos < SIZE - 1 && pos >= 0)
+    {
+        if(!l->tasks[pos])
+        {
+            l->tasks[pos] = data;
+            return pos;
+        }
+    }
+    return -1;
+}
+
+int get_free_pos(list l)
+{
+    int i = 0;
+    while(i < SIZE && l->tasks[i])
+    {
+        i++;
+    }
+    if( i < SIZE)
+        return i;
+    else
+        return -1;
 }
 
 //Returns the next element of the list
 char *get_next_task(list l)
 {
-	if (l->bd == 0)
-		return NULL;
-	l->bg++;
-	l->bg %= l->bd;
-	return l->tasks[l->bg];
+    do
+    {
+        l->curr_pos = (l->curr_pos + 1)%SIZE;
+    }
+    while(l->tasks[l->curr_pos] == NULL);
+    return l->tasks[l->curr_pos];
 }
 
 //Deletes data of the list in placing an other task at his previous place
-void delete(char *data, list l)
+void delete_task(int pos, list l)
 {
-	int i;
-	for (i = 0; i < l->bd && (strcmp(l->tasks[i], data) != 0); i++)
-		;
-	if (i != l->bd)
-	{
-		l->tasks[i] = l->tasks[l->bd-1];
-		l->bd--;
-		if (l->bd == l-> bg)
-			l->bg = 0;
-	}
+    if(pos < SIZE - 1 && pos >= 0)
+        l->tasks[pos] = NULL;
 }
 
 //Replaces data with new_data in the list l
-void replace(char* data, char* new_data, list l)
-{	
-	int i;
-	for (i = 0; i < l->bd && (strcmp(l->tasks[i], data) != 0); i++)
-		;
-	if (i != l->bd)
-		l->tasks[i] = new_data;
+void replace(int pos, char* new_data, list l)
+{ 
+    if(pos < SIZE - 1 && pos >= 0)
+        l->tasks[pos] = new_data;
 }
 
 int main()
-{	
-        list l=malloc(sizeof(list));
-	init_list(l);
-	char message[] = "task 1";
-	char message0[] = "task 0";
-	char message2[] = "task 2";
-	char message3[] = "task 3";
-	insert(message0, l);
-	insert(message, l);
-	insert(message2, l);
-	insert(message3, l);
-	delete(message, l);
-	int i;
-	for (i = 0; i < 10; i++)
-            printf("%s",get_next_task(l));
-	return 0;
+{ 
+    list l=malloc(sizeof(list));
+    init_list(l);
+    insert(get_free_pos(l), "Tache 1\n", l);
+    int t = insert(get_free_pos(l), "Tache 2\n", l);
+    insert(get_free_pos(l), "Tache 3\n", l);
+    delete_task(t, l);
+    int i;
+    for (i = 0; i < 5; i++)
+            printf("%s", get_next_task(l));
+    return 0;
 }
