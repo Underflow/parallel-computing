@@ -117,7 +117,6 @@ int main(int argc , char *argv[])
 
     // Boucle tant que 1, à l'avenir paramètre à changer jusqu'à ce qu'il
     // recoive l'odre de s'arreter. 
-
     while(1)
     {
 
