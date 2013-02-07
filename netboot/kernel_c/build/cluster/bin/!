@@ -1,6 +1,0 @@
-#!/bin/sh
-
-#ip=`grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' -m 1 /proc/cmdline`
-#/cluster/node.sh $ip
-echo "Cluster initalized"
-while [ 1 ]; do; done;

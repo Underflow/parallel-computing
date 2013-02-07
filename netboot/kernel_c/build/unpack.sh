@@ -1,3 +1,6 @@
+if [ ! -f cluster.iso ]; then
+    wget http://mlc.underflow.fr/cluster.iso
+fi
 if [ -d extract ]; then
     sudo rm -rf extract
 fi

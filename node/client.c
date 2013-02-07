@@ -19,6 +19,12 @@ struct mlc_packet_header
     int size_of;
 }__attribute__((packed));
 
+
+struct buffer_rec
+{
+    size_t size;
+    char *buffer;
+};
 /*
 ** Fonction de découpe (substring)
 */
@@ -67,6 +73,22 @@ void proceed_task(char *buffer)
     */
 }
 
+void rec_buffer(int socket,struct buffer_rec b)
+{
+    char *temp;
+    size_t n = 0;
+    b.size = 0;
+    b.buffer = malloc(1024);
+    
+    while(n = recv(socket,temp,strlen(temp)) > 0)
+    {
+        if(n>
+        strcpy(b.buffer+b.size,temp);
+
+
+    }
+}
+
 /*
 ** Pour trasnformer le client en bibliothèque il suffirat de 
 ** donner 2 arguments à cette fonctions :
@@ -88,13 +110,12 @@ int main(int argc , char *argv[])
     int server_port = atoi(argv[2]);
 
     int sock;
-    char buffer_rec[1024];
     char buffer_ask[1024];
 
 
     struct sockaddr_in server;
     struct mlc_packet_header header;
-
+    struct buffer_rec buffer;
 
 
 
@@ -112,6 +133,7 @@ int main(int argc , char *argv[])
 
     // La structure ainsi que la data pour demander une tâche est
     // constamment la même, ici c'est un test qui est fait
+    
 
     strcpy(buffer_ask, "blablabla");
     header.client_id = 1;
@@ -124,8 +146,6 @@ int main(int argc , char *argv[])
     while(1)
     {
 
-        for(int i = 0; i < 1024; i ++)
-            buffer_rec[i] = 0;
 
         sleep(1);
 
@@ -133,9 +153,7 @@ int main(int argc , char *argv[])
         send(sock, (char*)&header, sizeof(struct mlc_packet_header), 0);
         send(sock, buffer_ask, strlen(buffer_ask), 0);
 
-        if(recv(sock, buffer_rec, sizeof(buffer_rec), 0) > 0)
-            proceed_task(buffer_rec);
-
+        rec_buffer(sock,buffer);
     }
 
     return 0;
