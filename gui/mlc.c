@@ -1,65 +1,91 @@
 #include <ncurses.h>
+#include <string.h>
 
-#define KEY_ESCAPE 27
+#define KEY_ESCAPE  27
+#define KEY_TAB     9
+
+struct TaskBarItem {
+    int         index,
+                windows;
+    char       *name;
+    WINDOW     *win_left,
+               *win_right;
+};
+
+void draw_taskbar(struct TaskBarItem bar[], int tasks, int active)
+{
+    move(0, 0);
+
+    int color,
+        nb_cols = 0;
+
+    for (int i = 0; i < tasks; i++)
+    {
+        color = bar[i].index == active ? 2 : 1;
+        attron(COLOR_PAIR(color));
+
+        printw(bar[i].name);
+        int name_length = strlen(bar[i].name);
+        nb_cols += name_length;
+        for (int j = 0; j < COLS / tasks - name_length; j++)
+        {
+            printw(" ");
+            nb_cols++;
+        }
+
+        attroff(COLOR_PAIR(color));
+    }
+
+    attron(COLOR_PAIR(color));
+
+    for (; nb_cols < COLS; nb_cols++)
+        printw(" ");
+
+    attroff(COLOR_PAIR(color));
+
+    move (1, 0);
+}
 
 int main ()
 {
-    WINDOW *win_logs, *win_nodes, *win_term;
-    int _Key, _Active = 1;
+    int _Tasks      = 2,
+        _Active     = 1,
+        _Key;
+
+    struct TaskBarItem _TaskBar[_Tasks];
+
+    _TaskBar[0].index = 1;
+    _TaskBar[0].name = "F1: Shell";
+    _TaskBar[0].windows = 1;
+
+    _TaskBar[1].index = 2;
+    _TaskBar[1].name = "F2: Overview";
+    _TaskBar[1].windows = 2;
+
 
     initscr();
     start_color();
     keypad(stdscr, TRUE);
     cbreak();
+    noecho();
 
-    move(5, 5);
-    vline('│', 0);
+    init_pair(1, COLOR_BLACK, COLOR_WHITE);
+    init_pair(2, COLOR_WHITE, COLOR_BLUE);
 
-    refresh();
 
-    /*win_logs = newwin(LINES, COLS / 2, 0, 0);
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    wattron(win_logs, COLOR_PAIR(1));
-    wprintw(win_logs, "Test\n");
-    wrefresh(win_logs);
-    wattroff(win_logs, COLOR_PAIR(1));*/
-
-    /*while (true)
+    while (true)
     {
+        draw_taskbar(_TaskBar, _Tasks, _Active);
+        refresh();
+
         timeout(0);
         _Key = getch();
         if (_Key == KEY_ESCAPE)
             break;
-
-        switch (_Key)
-        {
-            case KEY_F(1):
-                _Active = 1;
-                break;
-            case KEY_F(2):
-                _Active = 2;
-                break;
-            case KEY_F(3):
-                _Active = 3;
-                break;
-        }
-
-        //wprintw(win_logs, "Test");
-        wrefresh(win_logs);
-        //printw("Active: %d\n", _Active);
-        refresh();
-    }*/
-
-
-    /*cbreak();
-    noecho();
-    refresh();*/
-
-    while (getch() != KEY_ESCAPE)
-    {
+        else if (_Key == KEY_TAB)
+            _Active = _Active < _Tasks ? _Active + 1 : 1;
     }
 
-    //getch();
     endwin();
 
     return 0;
