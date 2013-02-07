@@ -2,24 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-//Maximal size of the list
-#define SIZE 100
-
-//Struct of the list
-// bd : taille de la liste
-// bg : tache pointee
-
-//Todo : Rajouter size à l'interieur de la struct
-// Initialiser size dans init_list
-typedef struct s_list *list;
-struct s_list
-{
-    char *tasks[SIZE];
-    int curr_pos;
-};
+#include "task_list.h"
 
 //Initialise the list
-void init_list(list l)
+void init_tlist(task_list l)
 {
     l->curr_pos = -1;
     int i;
@@ -28,7 +14,7 @@ void init_list(list l)
 }
 
 //Inserts data at the end of list l
-int insert(int pos, char *data, list l)
+int insert_tlist(int pos, char *data, task_list l)
 {
     if(pos < SIZE - 1 && pos >= 0)
     {
@@ -41,7 +27,7 @@ int insert(int pos, char *data, list l)
     return -1;
 }
 
-int get_free_pos(list l)
+int free_pos_tlist(task_list l)
 {
     int i = 0;
     while(i < SIZE && l->tasks[i])
@@ -55,7 +41,7 @@ int get_free_pos(list l)
 }
 
 //Returns the next element of the list
-char *get_next_task(list l)
+char *next_tlist(task_list l)
 {
     do
     {
@@ -66,29 +52,15 @@ char *get_next_task(list l)
 }
 
 //Deletes data of the list in placing an other task at his previous place
-void delete_task(int pos, list l)
+void delete_tlist(int pos, task_list l)
 {
     if(pos < SIZE - 1 && pos >= 0)
         l->tasks[pos] = NULL;
 }
 
 //Replaces data with new_data in the list l
-void replace(int pos, char* new_data, list l)
+void replace_tlist(int pos, char* new_data, task_list l)
 { 
     if(pos < SIZE - 1 && pos >= 0)
         l->tasks[pos] = new_data;
-}
-
-int main()
-{ 
-    list l=malloc(sizeof(list));
-    init_list(l);
-    insert(get_free_pos(l), "Tache 1\n", l);
-    int t = insert(get_free_pos(l), "Tache 2\n", l);
-    insert(get_free_pos(l), "Tache 3\n", l);
-    delete_task(t, l);
-    int i;
-    for (i = 0; i < 5; i++)
-            printf("%s", get_next_task(l));
-    return 0;
 }
