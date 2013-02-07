@@ -6,10 +6,12 @@
 const unsigned int SIZE = 100;
 
 //Struct of the list
+// bd : taille de la liste
+// bg : tache pointee
 typedef struct s_list *list;
 struct s_list
 {
-	char *tasks[SIZE];
+	char *tasks[100];
 	int bg, bd;
 };
 
@@ -65,20 +67,19 @@ void replace(char* data, char* new_data, list l)
 
 int main()
 {	
-	/* Some tests
-	list l;
+        list l=malloc(sizeof(list));
 	init_list(l);
 	char message[] = "task 1";
+	char message0[] = "task 0";
 	char message2[] = "task 2";
 	char message3[] = "task 3";
+	insert(message0, l);
 	insert(message, l);
 	insert(message2, l);
 	insert(message3, l);
 	delete(message, l);
-	replace(message2, message3, l);
 	int i;
-	for (i = 0; i < l->bd; i++)
-		printf("%s\n", l->tasks[i]);
-	printf("%s", get_next_task(l)); */
+	for (i = 0; i < 10; i++)
+            printf("%s",get_next_task(l));
 	return 0;
 }
