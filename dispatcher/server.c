@@ -18,7 +18,7 @@
 #include "server.h"
 #include "schedulding.h"
 
-static const int PORT = 9995;
+static const int PORT = 4242;
 
 int main()
 {
@@ -27,7 +27,7 @@ int main()
     struct event *signal_event;
     struct sockaddr_in sin;
 
-    task_list tlist = init_tasks(10, 0);
+    task_list tlist = init_tasks(100, 0);
 
     
     base = event_base_new();
