@@ -69,6 +69,7 @@ int main()
 void handle_packet(struct mlc_packet_header header, char* data, struct bufferevent *bev)
 {
     printf("Packet recu -  size_of : %d", header.size_of);
+    send_packet(1,2,data,strlen(data),bev);
 }
 
 
@@ -108,7 +109,7 @@ void read_event(struct bufferevent *bev, void *user_data)
     printf("Données recues \n");
     struct evbuffer *buffer = bufferevent_get_input(bev);
     // On regarde si on a reçu au moins le header
-    printf("Sizeof(struct) :: length - %d::%d",sizeof(struct mlc_packet_header), evbuffer_get_length(buffer));
+    printf("Sizeof(struct) :: length - %d::%d\n",sizeof(struct mlc_packet_header), evbuffer_get_length(buffer));
     if(evbuffer_get_length(buffer) >= sizeof(struct mlc_packet_header))
     {
         struct mlc_packet_header header;
@@ -136,6 +137,7 @@ void read_event(struct bufferevent *bev, void *user_data)
     {
         printf("Header incomplet\n");
     }
+
 }
 
 /*

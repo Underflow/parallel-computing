@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS = -Wall -std=c99
-LDFLAGS =
+CFLAGS = -g -Wall -std=c99
+LDFLAGS = 
 LDLIBS = -levent
 
 SRC = $(wildcard *.c)
