@@ -40,6 +40,8 @@ char *substr(char *src,int pos,int len)
 
 void proceed_task(char *buffer)
 {
+    printf("%s\n", buffer + sizeof(struct mlc_packet_header));
+    /*
     struct mlc_packet_header *header;
 
     // Decoupe du header et cast en structure
@@ -62,7 +64,7 @@ void proceed_task(char *buffer)
 
     // Vide entièrement le buffer une fois que la tâche a été effectuer
     memset(&buffer[0], 0, sizeof(buffer));
-
+    */
 }
 
 /*
@@ -88,6 +90,8 @@ int main(int argc , char *argv[])
     int sock;
     char buffer_rec[1024];
     char buffer_ask[1024];
+
+
     struct sockaddr_in server;
     struct mlc_packet_header header;
 
@@ -119,6 +123,11 @@ int main(int argc , char *argv[])
     // recoive l'odre de s'arreter. 
     while(1)
     {
+
+        for(int i = 0; i < 1024; i ++)
+            buffer_rec[i] = 0;
+
+        sleep(1);
 
         printf("Demande de tâches ...\n");
         send(sock, (char*)&header, sizeof(struct mlc_packet_header), 0);

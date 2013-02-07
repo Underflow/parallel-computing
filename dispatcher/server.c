@@ -13,8 +13,10 @@
 #include <string.h>
 #include <signal.h>
 
-#include "server.h"
 #include "packet.h"
+#include "task_list.h"
+#include "server.h"
+#include "schedulding.h"
 
 static const int PORT = 9995;
 
@@ -24,6 +26,9 @@ int main()
     struct evconnlistener *listener;
     struct event *signal_event;
     struct sockaddr_in sin;
+
+    task_list tlist = init_tasks(100, 0);
+
     
     base = event_base_new();
     if (!base) {
@@ -35,7 +40,7 @@ int main()
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
 
-    listener = evconnlistener_new_bind(base, listener_connection_event, NULL,
+    listener = evconnlistener_new_bind(base, listener_connection_event, tlist,
                                        LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
                                        (struct sockaddr*)&sin,
                                        sizeof(sin));
@@ -66,10 +71,14 @@ int main()
 /*
 ** Cette méthode traite les données reçues après formatage.
 */
-void handle_packet(struct mlc_packet_header header, char* data, struct bufferevent *bev)
+void handle_packet(struct mlc_packet_header header, 
+                   char* data,
+                   struct bufferevent *bev,
+                   task_list tlist)
 {
-    printf("Packet recu -  size_of : %d", header.size_of);
-    send_packet(1,2,data,strlen(data),bev);
+    task t = next_tlist(tlist);
+    printf("Envoi tache %s\n", t->task);
+    send_packet(1,2,t->task,strlen(t->task),bev);
 }
 
 
@@ -93,7 +102,7 @@ void listener_connection_event(struct evconnlistener *listener,
         event_base_loopbreak(base);
         return;
     }
-    bufferevent_setcb(bev, read_event, NULL, client_connection_event, NULL);
+    bufferevent_setcb(bev, read_event, NULL, client_connection_event, user_data);
     bufferevent_enable(bev, EV_READ);
 }
 
@@ -106,10 +115,11 @@ void listener_connection_event(struct evconnlistener *listener,
 */
 void read_event(struct bufferevent *bev, void *user_data)
 {
-    printf("Données recues \n");
+
+    task_list tlist = (task_list)user_data;
+
     struct evbuffer *buffer = bufferevent_get_input(bev);
     // On regarde si on a reçu au moins le header
-    printf("Sizeof(struct) :: length - %d::%d\n",sizeof(struct mlc_packet_header), evbuffer_get_length(buffer));
     if(evbuffer_get_length(buffer) >= sizeof(struct mlc_packet_header))
     {
         struct mlc_packet_header header;
@@ -117,6 +127,8 @@ void read_event(struct bufferevent *bev, void *user_data)
         evbuffer_copyout(buffer, (void*)&header, sizeof(struct mlc_packet_header));
         // On regarge la taille des données dans le header afin de déterminer
         //si la totalité des données ont été reçues
+        
+        //printf("Buffer size : %d\n", evbuffer_get_length(buffer));
         if(evbuffer_get_length(buffer) >= header.size_of)
         {
             size_t data_size = header.size_of - sizeof(struct mlc_packet_header);
@@ -126,16 +138,8 @@ void read_event(struct bufferevent *bev, void *user_data)
             // On extrait les données du buffer
             evbuffer_remove(buffer, (void*)data, data_size); 
             // On traite le packet reçu, complet
-            handle_packet(header, data, bev);
+            handle_packet(header, data, bev, tlist);
         }
-        else
-        {
-            printf("Data incomplet\n");
-        }
-    }
-    else
-    {
-        printf("Header incomplet\n");
     }
 
 }

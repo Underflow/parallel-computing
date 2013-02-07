@@ -8,3 +8,7 @@ void client_connection_event(struct bufferevent *bev,
                              short events,
                              void *user_data);
 void close_event(evutil_socket_t sig, short events, void *user_data);
+void handle_packet(struct mlc_packet_header header, 
+                   char* data,
+                   struct bufferevent *bev,
+                   task_list tlist);
