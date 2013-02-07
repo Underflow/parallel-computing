@@ -21,11 +21,21 @@ void draw_taskbar(struct TaskBarItem bar[], int tasks, int active)
 
     for (int i = 0; i < tasks; i++)
     {
-        color = bar[i].index == active ? 2 : 1;
+        char name[256];
+        strcpy(name, bar[i].name);
+
+        if (bar[i].index == active)
+        {
+            color = 2;
+            strcat(name, " (active)");
+        }
+        else
+            color = 1;
+
         attron(COLOR_PAIR(color));
 
-        printw(bar[i].name);
-        int name_length = strlen(bar[i].name);
+        printw(name);
+        int name_length = strlen(name);
         nb_cols += name_length;
         for (int j = 0; j < COLS / tasks - name_length; j++)
         {
