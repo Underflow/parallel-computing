@@ -1,0 +1,4 @@
+#!ipxe
+kernel tftp://${next-server}/kernel root=/dev/ram0 nfsroot=${next-server}:/srv/nfs/Gentoo/,ro real_root=/dev/nfs
+initrd tftp://${next-server}/initrd
+boot

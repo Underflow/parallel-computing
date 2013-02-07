@@ -1,0 +1,4 @@
+#!ipxe
+kernel tftp://${next-server}/boot/kernel-genkernel-x86_64-3.4.9-gentoo ip=dhcp root=/dev/ram0 nfsroot=${next-server}:/srv/nfs/gentoo/,ro,vers=3 real_root=/dev/nfs
+initrd tftp://${next-server}/boot/initramfs-genkernel-x86_64-3.4.9-gentoo
+boot

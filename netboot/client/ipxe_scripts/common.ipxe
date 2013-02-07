@@ -1,0 +1,6 @@
+#!ipxe
+
+set use-cached 1
+dhcp net0
+echo next-server : ${next-server}
+chain http://${next-server}:8042/static/current.ipxe

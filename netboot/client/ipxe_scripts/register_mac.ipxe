@@ -1,0 +1,8 @@
+#!ipxe
+
+echo next-server : ${next-server} 
+echo -n Nom de la salle : && read salle
+echo -n Nom de la machine : && read name
+imgfetch http://${next-server}:8042/macs/${salle}/${name}/${mac}/
+prompt
+chain ${filename}
