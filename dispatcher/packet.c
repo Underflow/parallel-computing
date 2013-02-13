@@ -23,7 +23,6 @@ void send_packet(uint8_t cluster_id,
 
     // Envoi du packet
     bufferevent_write(bev, (char*)&header, sizeof(struct mlc_packet_header));
-    for(int i=0;i<80;i++)
     if(size_of)
         bufferevent_write(bev, data, size_of);
 }
