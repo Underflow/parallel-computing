@@ -5,6 +5,7 @@
 #define KEY_ESCAPE  27
 #define KEY_Y       121
 #define KEY_N       110
+#define NODE_NLEN   7 // strlen("r00p00 ")
 
 struct TaskBarItem {
     int         index,
@@ -19,6 +20,10 @@ struct Node {
                 p,
                 online;
 };
+
+int _C = 1; // if != 0 => refresh()
+
+struct Node _Nodes[30];
 
 void draw_taskbar(struct TaskBarItem bar[], int tasks, int active)
 {
@@ -66,22 +71,73 @@ void draw_taskbar(struct TaskBarItem bar[], int tasks, int active)
 
 void task_overview(WINDOW *win)
 {
+    // Temp
+    _Nodes[0].r = 1;
+    _Nodes[0].p = 1;
+    _Nodes[0].online = 1;
+
+    _Nodes[1].r = 1;
+    _Nodes[1].p = 2;
+    _Nodes[1].online = 1;
+
+    _Nodes[2].r = 1;
+    _Nodes[2].p = 3;
+    _Nodes[2].online = 0;
+
+    _Nodes[3].r = 1;
+    _Nodes[3].p = 4;
+    _Nodes[3].online = 1;
+
+    _Nodes[4].r = 1;
+    _Nodes[4].p = 5;
+    _Nodes[4].online = 1;
+
+    _Nodes[5].r = 2;
+    _Nodes[5].p = 1;
+    _Nodes[5].online = 1;
+
+    _Nodes[6].r = 2;
+    _Nodes[6].p = 2;
+    _Nodes[6].online = 1;
+
+    _Nodes[7].r = 2;
+    _Nodes[7].p = 3;
+    _Nodes[7].online = 1;
+
+    _Nodes[8].r = 3;
+    _Nodes[8].p = 1;
+    _Nodes[8].online = 0;
+
+    _Nodes[9].r = 3;
+    _Nodes[9].p = 2;
+    _Nodes[9].online = 1;
+
+    _Nodes[10].r = 3;
+    _Nodes[10].p = 3;
+    _Nodes[10].online = 1;
+
+    _Nodes[11].r = 3;
+    _Nodes[11].p = 4;
+    _Nodes[11].online = 1;
+
+
     wmove(win, 1, 1);
-    wprintw(win, "Nodes list.");
+    wprintw(win, "Nodes list. Legend: green=online, red=offline.");
 
-    wmove(win, 4, 1);
+    for (int i = 0; i < sizeof(_Nodes) / sizeof(struct Node); i++)
+    {
+        if (_Nodes[i].r != 0 && _Nodes[i].p != 0)
+        {
+            wmove(win,
+                1 + 2 * _Nodes[i].r,
+                1 + (_Nodes[i].p - 1) * NODE_NLEN);
 
-    // Display a node
-    wattron(win, COLOR_PAIR(3));
-    wprintw(win, "r01p01");
-    wattroff(win, COLOR_PAIR(3));
-
-    wmove (win, 6, 1);
-
-    // Display a node
-    wattron(win, COLOR_PAIR(4));
-    wprintw(win, "r02p01");
-    wattroff(win, COLOR_PAIR(4));
+            int color = 3 + _Nodes[i].online;
+            wattron(win, COLOR_PAIR(color));
+            wprintw(win, "r%02dp%02d", _Nodes[i].r, _Nodes[i].p);
+            wattroff(win, COLOR_PAIR(color));
+        }
+    }
 }
 
 void draw_windows(struct TaskBarItem task)
@@ -107,8 +163,6 @@ void draw_windows(struct TaskBarItem task)
 
 int main ()
 {
-    int *_C = 1; // if != 0 => refresh()
-
     CDKSCREEN *cdkscreen;
     WINDOW *ncurses;
 
@@ -148,8 +202,8 @@ int main ()
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
     init_pair(2, COLOR_WHITE, COLOR_BLUE);
     // Overview
-    init_pair(3, COLOR_BLACK, COLOR_GREEN);
-    init_pair(4, COLOR_WHITE, COLOR_RED);
+    init_pair(3, COLOR_WHITE, COLOR_RED);
+    init_pair(4, COLOR_BLACK, COLOR_GREEN);
 
 
     showGUI:
