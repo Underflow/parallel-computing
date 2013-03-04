@@ -14,6 +14,12 @@ struct TaskBarItem {
                *win_right;
 };
 
+struct Node {
+    int         r,
+                p,
+                online;
+};
+
 void draw_taskbar(struct TaskBarItem bar[], int tasks, int active)
 {
     move(0, 0);
