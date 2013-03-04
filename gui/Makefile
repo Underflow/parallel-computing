@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS = -Wall -std=c99
 LDFLAGS =
-LDLIBS = -lncurses
+LDLIBS = -lcdk -lncurses
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:.c=.o)
@@ -17,3 +17,7 @@ $(AOUT): $(OBJS)
 clean:
 	@rm *.o
 	@rm $(AOUT)
+
+run: all
+	@./$(AOUT)
+
