@@ -77,18 +77,8 @@ void handle_packet(struct mlc_packet_header header,
                    task_list tlist)
 {
     task t = next_tlist(tlist);
-    switch (header.opcode)
-	{
-	case 1:
     printf("Envoi tache %s\n", t->task);
-    send_packet(header.cluster_id,2,"ls", strlen(t->task),bev);
-    break;
-	default:
-    	;
-	}
-	//task t = next_tlist(tlist);
-    //printf("Envoi tache %s\n", t->task);
-    //send_packet(1,2,t->task,strlen(t->task),bev);
+    send_packet(1,2,t->task,strlen(t->task),bev);
 }
 
 

