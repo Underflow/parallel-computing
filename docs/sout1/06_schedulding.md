@@ -1,10 +1,10 @@
-Répartition des tâches
-=========================
+RÃ©partition des tÃ¢ches
 
-En ce qui concerne la répartition des tâches, nous avons choisi de fonctionner avec une liste circulaire.
-Cette liste circulaire a une taille fixée de n tâches. On attribue toute tâche encore dans la liste à un noeud de notre cluster, soit à un client. 
-Une fois que la tâche est achevée par le noeud, celle-ci est retirée de la liste et est remplacée par une nouvelle tâche si il en reste à faire.
-Le but de ce type de liste circulaire est le suivant : admettons que nous ayons 2000 tâches à répartir, il serait inutile de faire une liste d'une taille de 2000 tâches car la liste serait beaucoup trop grande. Ainsi, avec notre principe de liste circulaire à taille fixée, on créera une liste de 100 tâches, par exemple, que l'on remplira avec 100 tâches des 2000 à effectuer. Dès qu'une tâche de la liste est terminée, on la remplace par une tâche parmi les 1900 autres restantes et ainsi de suite jusqu'à avoir effectuer la totalité des tâches.
-Chaque tâche de la liste possède deux champs: 
-- un "id", qui est un entier qui représente le numéro de la tâche parmi la totalité des tâches à faire (2000 dans l'exemple précédent) et non pas parmi les n tâches à faire avec n la taille de la liste circulaire.
-- un champ "task", qui est une chaîne de caractères, qui contiendra une commande qui lancera un éxécutable permettant d'effectuer la tâche (un calcul par exemple).
+
+En ce qui concerne la rÃ©partition des tÃ¢ches, nous avons choisi de fonctionner avec une liste circulaire.
+Cette liste circulaire a une taille fixÃ©e de n tÃ¢ches. On attribue toute tÃ¢che encore dans la liste Ã  un noeud de notre cluster, soit Ã  un client. 
+Une fois que la tÃ¢che est achevÃ©e par le noeud, celle-ci est retirÃ©e de la liste et est remplacÃ©e par une nouvelle tÃ¢che si il en reste Ã  faire.
+Le but de ce type de liste circulaire est le suivant : admettons que nous ayons 2000 tÃ¢ches Ã  rÃ©partir, il serait inutile de faire une liste d'une taille de 2000 tÃ¢ches car la liste serait beaucoup trop grande. Ainsi, avec notre principe de liste circulaire Ã  taille fixÃ©e, on crÃ©era une liste de 100 tÃ¢ches, par exemple, que l'on remplira avec 100 tÃ¢ches des 2000 Ã  effectuer. DÃ¨s qu'une tÃ¢che de la liste est terminÃ©e, on la remplace par une tÃ¢che parmi les 1900 autres restantes et ainsi de suite jusqu'Ã  avoir effectuer la totalitÃ© des tÃ¢ches.
+Chaque tÃ¢che de la liste possÃ¨de deux champs: 
+- un "id", qui est un entier qui reprÃ©sente le numÃ©ro de la tÃ¢che parmi la totalitÃ© des tÃ¢ches Ã  faire (2000 dans l'exemple prÃ©cÃ©dent) et non pas parmi les n tÃ¢ches Ã  faire avec n la taille de la liste circulaire.
+- un champ "task", qui est une chaÃ®ne de caractÃ¨res, qui contiendra une commande qui lancera un Ã©xÃ©cutable permettant d'effectuer la tÃ¢che (un calcul par exemple).
