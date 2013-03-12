@@ -1,8 +1,11 @@
 #include <ncurses.h>
+#include <cdk/cdk.h>
 #include <string.h>
 
 #define KEY_ESCAPE  27
-#define KEY_TAB     9
+#define KEY_Y       121
+#define KEY_N       110
+#define NODE_NLEN   7 // strlen("r00p00 ")
 
 struct TaskBarItem {
     int         index,
@@ -11,6 +14,16 @@ struct TaskBarItem {
     WINDOW     *win_left,
                *win_right;
 };
+
+struct Node {
+    int         r,
+                p,
+                online;
+};
+
+int _C = 1; // if != 0 => refresh()
+
+struct Node _Nodes[30];
 
 void draw_taskbar(struct TaskBarItem bar[], int tasks, int active)
 {
@@ -53,12 +66,113 @@ void draw_taskbar(struct TaskBarItem bar[], int tasks, int active)
 
     attroff(COLOR_PAIR(color));
 
-    move (1, 0);
+    move(1, 0);
+}
+
+void task_overview(WINDOW *win)
+{
+    // Temp
+    _Nodes[0].r = 1;
+    _Nodes[0].p = 1;
+    _Nodes[0].online = 1;
+
+    _Nodes[1].r = 1;
+    _Nodes[1].p = 2;
+    _Nodes[1].online = 1;
+
+    _Nodes[2].r = 1;
+    _Nodes[2].p = 3;
+    _Nodes[2].online = 0;
+
+    _Nodes[3].r = 1;
+    _Nodes[3].p = 4;
+    _Nodes[3].online = 1;
+
+    _Nodes[4].r = 1;
+    _Nodes[4].p = 5;
+    _Nodes[4].online = 1;
+
+    _Nodes[5].r = 2;
+    _Nodes[5].p = 1;
+    _Nodes[5].online = 1;
+
+    _Nodes[6].r = 2;
+    _Nodes[6].p = 2;
+    _Nodes[6].online = 1;
+
+    _Nodes[7].r = 2;
+    _Nodes[7].p = 3;
+    _Nodes[7].online = 1;
+
+    _Nodes[8].r = 3;
+    _Nodes[8].p = 1;
+    _Nodes[8].online = 0;
+
+    _Nodes[9].r = 3;
+    _Nodes[9].p = 2;
+    _Nodes[9].online = 1;
+
+    _Nodes[10].r = 3;
+    _Nodes[10].p = 3;
+    _Nodes[10].online = 1;
+
+    _Nodes[11].r = 3;
+    _Nodes[11].p = 4;
+    _Nodes[11].online = 1;
+
+
+    wmove(win, 1, 1);
+    wprintw(win, "Nodes list. Legend: green=online, red=offline.");
+
+    for (int i = 0; i < sizeof(_Nodes) / sizeof(struct Node); i++)
+    {
+        if (_Nodes[i].r != 0 && _Nodes[i].p != 0)
+        {
+            wmove(win,
+                1 + 2 * _Nodes[i].r,
+                1 + (_Nodes[i].p - 1) * NODE_NLEN);
+
+            int color = 3 + _Nodes[i].online;
+            wattron(win, COLOR_PAIR(color));
+            wprintw(win, "r%02dp%02d", _Nodes[i].r, _Nodes[i].p);
+            wattroff(win, COLOR_PAIR(color));
+        }
+    }
+}
+
+void draw_windows(struct TaskBarItem task)
+{
+    int winwidth = COLS;
+    if (task.windows == 2)
+    {
+        winwidth /= 2;
+        task.win_right = newwin(LINES - 1, winwidth, 1, winwidth);
+        wrefresh(task.win_right);
+    }
+    task.win_left = newwin(LINES - 1, winwidth, 1, 0);
+
+    switch (task.index)
+    {
+        case 2:
+            task_overview(task.win_left);
+            break;
+    }
+
+    wrefresh(task.win_left);
 }
 
 int main ()
 {
-    int _Tasks      = 2,
+    CDKSCREEN *cdkscreen;
+    WINDOW *ncurses;
+
+    CDKLABEL *close;
+    char *close_text[3];
+    close_text[0] = "Do you really want to quit?";
+    close_text[1] = "";
+    close_text[2] = "Y: yes, N: no";
+
+    int _Tasks      = 3,
         _Active     = 1,
         _Key;
 
@@ -72,28 +186,66 @@ int main ()
     _TaskBar[1].name = "F2: Overview";
     _TaskBar[1].windows = 2;
 
+    _TaskBar[2].index = 3;
+    _TaskBar[2].name = "F3: About/help";
+    _TaskBar[2].windows = 1;
 
-    initscr();
+
+    ncurses = initscr();
+    cdkscreen = initCDKScreen(ncurses);
     start_color();
     keypad(stdscr, TRUE);
     cbreak();
     noecho();
 
+    // TaskBar
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
     init_pair(2, COLOR_WHITE, COLOR_BLUE);
+    // Overview
+    init_pair(3, COLOR_WHITE, COLOR_RED);
+    init_pair(4, COLOR_BLACK, COLOR_GREEN);
 
 
+    showGUI:
     while (true)
     {
-        draw_taskbar(_TaskBar, _Tasks, _Active);
-        refresh();
+        if (_C != 0)
+        {
+            draw_taskbar(_TaskBar, _Tasks, _Active);
+            refresh();
+            draw_windows(_TaskBar[_Active - 1]);
+            refresh();
+        }
 
         timeout(0);
         _Key = getch();
+        _C = 1;
         if (_Key == KEY_ESCAPE)
             break;
         else if (_Key == KEY_TAB)
             _Active = _Active < _Tasks ? _Active + 1 : 1;
+        else
+            _C = 0;
+
+        goto showGUI;
+    }
+
+
+    close = newCDKLabel(cdkscreen, CENTER, CENTER, close_text, 3, TRUE, FALSE);
+    refreshCDKScreen(cdkscreen);
+    refresh();
+
+    while (true)
+    {
+        int k = getch();
+        if (k == KEY_N)
+        {
+            destroyCDKLabel(close);
+            refreshCDKScreen(cdkscreen);
+            goto showGUI;
+        }
+        else if (k == KEY_Y)
+            break;
     }
 
     endwin();
