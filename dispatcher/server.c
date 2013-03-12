@@ -63,7 +63,7 @@ int main()
     event_free(signal_event);
     event_base_free(base);
 
-    printf("done\n"); 
+    printf("done\n");
 
     return 0;
 }
@@ -78,17 +78,24 @@ void handle_packet(struct mlc_packet_header header,
 {
     task t = next_tlist(tlist);
     switch (header.opcode)
-	{
-	case 1:
-    printf("Envoi tache %s\n", t->task);
-    send_packet(header.cluster_id,2,"ls", strlen(t->task),bev);
-    break;
-	default:
-    	;
-	}
-	//task t = next_tlist(tlist);
-    //printf("Envoi tache %s\n", t->task);
-    //send_packet(1,2,t->task,strlen(t->task),bev);
+    {
+        case 1:
+            send_packet(header.cluster_id, 2, t->task, strlen(t->task), bev);
+            /* association tâche/noeud
+            pour pouvoir retrouver une tâche (afin de la terminer plus tard,
+            il faut d'abord associer un client_id à une tâche.
+            Pour l'opcode 0x03, on end_task() la tache correspondante au
+            client_id
+            */
+            break;
+        case 2:
+            perror("Error : this opcode is not implemented");
+        case 3:
+            printf("Reveived result : %s\n", data);
+            break;
+        default:
+            break;
+    }
 }
 
 

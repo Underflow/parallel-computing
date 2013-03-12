@@ -62,7 +62,7 @@ void delete_tlist(int pos, task_list l)
 
 //Replaces data with new_data in the list l
 void replace_tlist(int pos, task tsk, task_list l)
-{ 
+{
     if(pos < l->size && pos >= 0)
         l->tasks[pos] = tsk;
 }
