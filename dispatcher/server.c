@@ -63,7 +63,6 @@ int main()
     event_free(signal_event);
     event_base_free(base);
 
-    printf("done\n"); 
 
     return 0;
 }
@@ -76,9 +75,27 @@ void handle_packet(struct mlc_packet_header header,
                    struct bufferevent *bev,
                    task_list tlist)
 {
-    task t = next_tlist(tlist);
-    printf("Envoi tache %s\n", t->task);
-    send_packet(1,2,t->task,strlen(t->task),bev);
+    task t;
+    switch (header.opcode)
+    {
+        case 1:
+            t = next_tlist(tlist);
+            send_packet(header.cluster_id, 2, t->task, strlen(t->task), bev);
+            /* association tâche/noeud
+            pour pouvoir retrouver une tâche (afin de la terminer plus tard,
+            il faut d'abord associer un client_id à une tâche.
+            Pour l'opcode 0x03, on end_task() la tache correspondante au
+            client_id
+            */
+            break;
+        case 2:
+            perror("Error : this opcode is not implemented");
+        case 3:
+            printf("Received result : %s", data);
+            break;
+        default:
+            break;
+    }
 }
 
 
@@ -119,8 +136,9 @@ void read_event(struct bufferevent *bev, void *user_data)
     task_list tlist = (task_list)user_data;
 
     struct evbuffer *buffer = bufferevent_get_input(bev);
+
     // On regarde si on a reçu au moins le header
-    if(evbuffer_get_length(buffer) >= sizeof(struct mlc_packet_header))
+    while(evbuffer_get_length(buffer) >= sizeof(struct mlc_packet_header))
     {
         struct mlc_packet_header header;
         // Le header est complet, on l'extrait
@@ -128,7 +146,6 @@ void read_event(struct bufferevent *bev, void *user_data)
         // On regarge la taille des données dans le header afin de déterminer
         //si la totalité des données ont été reçues
         
-        //printf("Buffer size : %d\n", evbuffer_get_length(buffer));
         if(evbuffer_get_length(buffer) >= header.size_of)
         {
             size_t data_size = header.size_of - sizeof(struct mlc_packet_header);
@@ -140,6 +157,8 @@ void read_event(struct bufferevent *bev, void *user_data)
             // On traite le packet reçu, complet
             handle_packet(header, data, bev, tlist);
         }
+        else
+            break;
     }
 
 }
