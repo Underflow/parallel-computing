@@ -6,14 +6,7 @@ task generate_task(int id)
 {
     task t = malloc(sizeof(struct s_task));
     char* str = calloc(30, 1);
-    if(id < 99)
-    {
-        sprintf(str, "echo Tâche %d", id);
-    }
-    else
-    {
-        sprintf(str, "ifconfig", id);
-    }
+    sprintf(str, "echo Tâche %d", id);
     t->id = id;
     t->task = str;
     return t;

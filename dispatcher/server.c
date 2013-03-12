@@ -149,7 +149,7 @@ void read_event(struct bufferevent *bev, void *user_data)
         if(evbuffer_get_length(buffer) >= header.size_of)
         {
             size_t data_size = header.size_of - sizeof(struct mlc_packet_header);
-            char *data = malloc(data_size);
+            char *data = calloc(1, data_size);
             // On supprime le header du buffer
             evbuffer_drain(buffer, sizeof(struct mlc_packet_header));
             // On extrait les données du buffer
