@@ -1,3 +1,5 @@
+<fontsize>$12$</fontsize>
+
 Première soutenance
 ==================================
 Répartitions des tâches (scheduling)

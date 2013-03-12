@@ -1,3 +1,5 @@
+<fontsize>$12$</fontsize>
+
 Rappels du projet MyLittleCluster
 ==========================================
 
