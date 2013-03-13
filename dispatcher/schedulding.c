@@ -1,12 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "task_list.h"
+#define _BSD_SOURCE
+#include <unistd.h>
+#include <sys/time.h>
+#include <time.h>
+
+struct { int freq; int len; unsigned long delay; } freqs[] = {
+#include "notes.def"
+};
 
 task generate_task(int id)
 {
     task t = malloc(sizeof(struct s_task));
-    char* str = calloc(30, 1);
-    sprintf(str, "echo Tâche %d", id);
+    char* str = calloc(100, 1);
+    static int note = 0;
+
+    sprintf(str,
+        //"usleep $(( $((%lu - `date +%%s`))  ));"
+        //"echo `date +%%s` -- %u;"
+        "echo '\x1b[10;%d]\x1B[11;%d]\a' >> /dev/null;"
+        "echo BEEP;",
+        //wait[note] + start * 1000UL,
+        freqs[note].freq,
+        freqs[note].len);
+    note = (note + 1) % (sizeof (freqs) / sizeof (freqs[0]));
     t->id = id;
     t->task = str;
     return t;

@@ -20,6 +20,10 @@
 
 static const int PORT = 4242;
 
+static struct { int freq; int len; unsigned long delay; } freqs[] = {
+#include "notes.def"
+};
+
 int main()
 {
     struct event_base *base;
@@ -79,8 +83,30 @@ void handle_packet(struct mlc_packet_header header,
     switch (header.opcode)
     {
         case 1:
-            t = next_tlist(tlist);
-            send_packet(header.cluster_id, 2, t->task, strlen(t->task), bev);
+        {
+    struct timeval  tv;
+    gettimeofday(&tv, NULL);
+
+    double time_in_mill = 
+             (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ;
+    static double old_time = 0;
+
+    static int note = 0;
+    note = (note + 1) % (sizeof (freqs) / sizeof (freqs[0]));
+
+    if(old_time + freqs[note].delay < time_in_mill)
+    {
+    old_time = time_in_mill;    
+    t = next_tlist(tlist);
+    send_packet(header.cluster_id, 2, t->task, strlen(t->task), bev);
+    }
+    else
+    {
+    send_packet(header.cluster_id, 2, NULL, 0, bev);
+    }
+
+
+            
             /* association tâche/noeud
             pour pouvoir retrouver une tâche (afin de la terminer plus tard,
             il faut d'abord associer un client_id à une tâche.
@@ -88,10 +114,13 @@ void handle_packet(struct mlc_packet_header header,
             client_id
             */
             break;
+        }
         case 2:
             perror("Error : this opcode is not implemented");
         case 3:
-            printf("Received result : %s", data);
+            if(strlen(data))
+                printf("Received result : %s", data);
+
             break;
         default:
             break;
@@ -160,7 +189,6 @@ void read_event(struct bufferevent *bev, void *user_data)
         else
             break;
     }
-
 }
 
 /*
@@ -191,7 +219,8 @@ void client_connection_event(struct bufferevent *bev,
 void close_event(evutil_socket_t sig, short events, void *user_data)
 {
     struct event_base *base = user_data;
-    struct timeval delay = { 2, 0 };
+    struct timeval delay = { 0, 0 };
     printf("Exiting server : 2 sec.\n");
     event_base_loopexit(base, &delay);
+
 }

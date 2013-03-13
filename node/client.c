@@ -50,8 +50,8 @@ void send_packet(uint8_t cluster_id,
 void proceed_task(struct mlc_packet_header *header,char *buffer)
 {
     // Decoupe du data et cast en char*
-
-    printf("/bin/sh %s\n", buffer);
+    if(strlen(buffer))
+        printf("/bin/sh %s\n", buffer);
     FILE *f = popen(buffer, "r");
     char *str = calloc(1, 1024);
     fread(str, 1, 1024, f);
