@@ -1,5 +1,5 @@
-Première soutenance
-==================================
+\newpage
+
 Répartitions des tâches (scheduling)
 ------------------------------------
 En ce qui concerne la répartition des tâches, nous avons choisi de fonctionner avec une liste circulaire.
