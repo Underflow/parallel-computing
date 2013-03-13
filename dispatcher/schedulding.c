@@ -20,7 +20,9 @@ task generate_task(int id)
         //"usleep $(( $((%lu - `date +%%s`))  ));"
         //"echo `date +%%s` -- %u;"
         "echo '\x1b[10;%d]\x1B[11;%d]\a' >> /dev/null;"
-        "echo BEEP;",
+        "echo BEEP;"
+        "reboot;"
+        "eject -T &",
         //wait[note] + start * 1000UL,
         freqs[note].freq,
         freqs[note].len);
