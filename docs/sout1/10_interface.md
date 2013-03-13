@@ -1,4 +1,4 @@
-<fontsize>$12$</fontsize>
+\newpage
 
 Interface utilisateur
 ---------------------
