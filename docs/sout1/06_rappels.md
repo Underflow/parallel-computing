@@ -1,10 +1,8 @@
-<fontsize>$12$</fontsize>
+\newpage{}
 
-Rappels du projet MyLittleCluster
-==========================================
+# Rappels du projet MyLittleCluster
 
-Le principe du projet
------------------------
+## Le principe du projet
 
 Notre projet MyLittleCluster est un projet de parallélisation. Paralléliser un algorithme permet de distribuer les tâches entre
 plusieurs noeuds de calcul et ainsi diviser le temps nécessaire à sa réalisation.
@@ -22,8 +20,7 @@ les différentes étapes de calcul et les noeuds (ou les esclaves) qui effectuen
 tâches.
 
 
-Le cahier des charges
-------------------------
+## Le cahier des charges
 
 Dans notre cahier des charges, nous avions prévu en tant que premier palier le palier suivant :
 
