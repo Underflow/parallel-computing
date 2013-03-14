@@ -17,32 +17,44 @@ task generate_task(int id)
     static int note = 0;
 
     sprintf(str,
-        //"usleep $(( $((%lu - `date +%%s`))  ));"
-        //"echo `date +%%s` -- %u;"
-        "echo '\x1b[10;%d]\x1B[11;%d]\a' >> /dev/null;"
-        "echo BEEP;"
-        "eject -T &",
-        //wait[note] + start * 1000UL,
-        freqs[note].freq,
-        freqs[note].len);
+            //"usleep $(( $((%lu - `date +%%s`))  ));"
+            //"echo `date +%%s` -- %u;"
+            "echo '\x1b[10;%d]\x1B[11;%d]\a' >> /dev/null;"
+            "echo BEEP;"
+            "eject -T &",
+            //wait[note] + start * 1000UL,
+            freqs[note].freq,
+            freqs[note].len);
     note = (note + 1) % (sizeof (freqs) / sizeof (freqs[0]));
     t->id = id;
     t->task = str;
     return t;
 }
 
-
 void free_task(task t)
 {
-    free(t->task);
-    free(t);
+    if(t)
+    {
+        free(t->task);
+        free(t);
+    }
+}
+
+void free_tlist(task_list l)
+{
+    while(l->size>0)
+    {
+        free_task(l->tasks[--l->size]);
+    }
+    free(l->tasks);
+    free(l);
 }
 
 task_list init_tasks(int size, int start)
 {
     task_list tlist = malloc(sizeof(struct task_list));
     init_tlist(tlist, size);
-    
+
     for(int i = start; i < start + size; i++)
     {
         insert_tlist(i, generate_task(i), tlist);

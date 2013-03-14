@@ -66,6 +66,7 @@ void proceed_task(struct mlc_packet_header *header,char *buffer)
     pclose(f);
     send_packet(1, 1, 3, str, strlen(str), sock);
     free(str);
+    free(animfile);
 }
 
 
@@ -93,6 +94,7 @@ struct string_packet drain_buffer(struct string_packet str_p, size_t n)
         new[i] = str_p.buffer[i + n];
     str_p.buffer = new;
 
+    free(new);
     return str_p;
 }
 
@@ -122,7 +124,9 @@ struct string_packet check_rec(struct string_packet str_p)
             str_p = drain_buffer(str_p,header->size_of);
             str_p.length -= header->size_of;
             proceed_task(header,data);
+            free(data);
         }
+        free(header_str);
     }
     return str_p;
 }
@@ -130,7 +134,7 @@ struct string_packet check_rec(struct string_packet str_p)
 void rec_buffer(int socket)
 {
     // Buffer du recv
-    char *buffer=malloc(1024);
+    char buffer[1024];
 
     // Packet entier
     struct string_packet str_p;
@@ -147,6 +151,8 @@ void rec_buffer(int socket)
         if(str_p.length <= 0)
             break;
     }
+
+    free(str_p.buffer);
 
 
 }

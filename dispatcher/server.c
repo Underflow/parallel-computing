@@ -67,6 +67,7 @@ int main()
     event_free(signal_event);
     event_base_free(base);
 
+    free_tlist(tlist);
 
     return 0;
 }
@@ -185,6 +186,7 @@ void read_event(struct bufferevent *bev, void *user_data)
             evbuffer_remove(buffer, (void*)data, data_size); 
             // On traite le packet reçu, complet
             handle_packet(header, data, bev, tlist);
+            free(data);
         }
         else
             break;
