@@ -50,23 +50,24 @@ void send_packet(uint8_t cluster_id,
 void proceed_task(struct mlc_packet_header *header,char *buffer)
 {
     // Decoupe du data et cast en char*
-    if(strlen(buffer))
-        printf("/bin/sh %s\n", buffer);
-    static int frame = 0;
-    frame = (frame + 1)%6+1;
+    //if(strlen(buffer))
+    //    printf("/bin/sh %s\n", buffer);
+    // static int frame = 0;
+    //frame = (frame + 1)%6+1;
     
-    char* animfile = calloc(1, 50);
-    system("clear");
-    sprintf(animfile, "cat /cluster/bin/anim/%d", frame);
-    system(animfile);
+    //char* animfile = calloc(1, 50);
+    //system("clear");
+    //sprintf(animfile, "cat anim/%d", frame);
+    //system(animfile);
 
-    FILE *f = popen(buffer, "r");
+    FILE *f = popen("./application/bruteforce 123 189", "r");
     char *str = calloc(1, 1024);
     fread(str, 1, 1024, f);
     pclose(f);
-    send_packet(1, 1, 3, str, strlen(str), sock);
-    free(str);
-    free(animfile);
+    printf("%s\n",str);
+    //send_packet(1, 1, 3, str, strlen(str), sock);
+    //free(str);
+    //free(animfile);
 }
 
 
@@ -152,7 +153,6 @@ void rec_buffer(int socket)
             break;
     }
 
-    free(str_p.buffer);
 
 
 }
