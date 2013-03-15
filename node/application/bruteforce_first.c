@@ -2,43 +2,86 @@
 #include <stdlib.h>
 #include <string.h>
 
-void increment_str(char* src,int offset)
+void increment_str(int* src,int size,int offset,char *dictionary,size_t size_dic)
 {   
     size_t j = offset;
-    size_t i = strlen(src) -1 - offset;
+    size_t i = size -1 - offset;
     if (i < 0)
         return;
 
 
-    if(*(src + i) == 'Z')
+    if(*(src + i) == size_dic -1)
     {
         j++;
-        *(src + i) = '0';
-
-        increment_str(src,j);
+        *(src + i) = 0;
+        
+        increment_str(src,size,j,dictionary,size_dic);
     }
-    else if(*(src + i) == '9')
-        *(src + i) = 'A';
     else
-        *(src + i) = (char)src[i] + 1;
+        *(src + i) = src[i] + 1;
 
 }
 
-int compareString(char* str_1,char* str_2)
+int compareString(int* str_1,int* str_2,int size)
 {
-    if(strlen(str_1) == strlen(str_2))
-    {
         size_t i;
-        for(i=0;i<strlen(str_1);i++)
+        for(i=0;i<size;i++)
         {
-            if((char)str_1[i] != (char)str_2[i])
+            if(str_1[i] != str_2[i])
             {
                 return 0;
             }
         }
         return 1;
+}
+
+void add_Dictionary(int ascii_begin,int ascii_end,char *dictionary)
+{
+    size_t i;
+    for(i=ascii_begin; i <= ascii_end; i++)
+    {
+        *(dictionary + i - ascii_begin)=(char)i;
+    }
+}
+
+int findKey(char searsch,char *dictionary)
+{
+    size_t i;
+    for(i=0;i<strlen(dictionary);i++)
+    {
+        if(*(dictionary + i) == searsch)
+            return i;
     }
     return 0;
+}
+
+void char_to_int(char *src,int *dst,char *dictionary)
+{
+    size_t i;
+    for(i=0;i<strlen(src);i++)
+    {
+        *(dst + i) = findKey(*(src + i),dictionary); 
+    }
+}
+
+void char_to_int_plg1(char *plg1,char *plg2,int *dst,char *dictionary)
+{
+    if(strlen(plg1) < strlen(plg2))
+    {
+        size_t i;
+        for(i=0;i<strlen(plg2)-strlen(plg1);i++)
+        {
+            *(dst +i) = -1;
+        }
+        for(i=strlen(plg2)-strlen(plg1);i<=strlen(plg2);i++)
+        {
+            *(dst + i) = findKey(*(plg1 + i),dictionary);
+        }
+    }
+    else
+    {
+        char_to_int(plg1,dst,dictionary);
+    }
 }
 
 int main(int argc,char * argv [])
@@ -56,31 +99,30 @@ int main(int argc,char * argv [])
     ** - Fin de la plage ex : FFFFFF sachant que AAAAAA < AAAAAF
     ** - Mot de passe réel
     ** 
+    ** AAA < AAAA
     */
 
     if(argc==4)
     {
-        char *plg_2 = argv[2];
-        char *real_pwd = argv[3];
-        char *try_found = argv[1];
+        int *plg_2 = malloc(sizeof(int) * strlen(argv[2]));
+        int *real_pwd = malloc(sizeof(int) * strlen(argv[3]));
+        int *try_found = malloc(sizeof(int) * strlen(argv[2]));
+        char *Dictionary= malloc(126-33);
 
-        strcpy(plg_2,argv[2]);
-        strcpy(real_pwd,argv[3]);
-        strcpy(try_found,argv[1]);
+        size_t size_plg = strlen(argv[2]);
+        size_t size_dic = strlen(Dictionary)
+        add_Dictionary(33,126,Dictionary);
+        
+        char_to_int(argv[2],plg_2,Dictionary);
+        char_to_int(argv[3],real_pwd,Dictionary);
+        char_to_int_plg1(argv[1],argv[2],try_found,Dictionary);
 
-        while(compareString(try_found,plg_2) != 1 && compareString(try_found,real_pwd)!= 1)
-        {
-            increment_str(try_found,0);
-            printf("%s\n",try_found);
-        }
-        if(compareString(try_found,real_pwd) == 1)
-        {
-            printf("Find Mot de passe trouvé : %s",try_found);
-        }
+        while(compareString(try_found,plg_2,size_plg) != 1 && compareString(try_found,real_pwd,size_plg)!= 1)
+            increment_str(try_found,size_plg,0,Dictionary,size_dic);
+        if(compareString(try_found,real_pwd,size_plg) == 1)
+            printf("1");
         else
-        {
-            printf("Not_Found");
-        }
+            printf("0");
 
     }
     return 0;
