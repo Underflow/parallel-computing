@@ -44,11 +44,18 @@ int compareString(char* str_1,char* str_2)
 int main(int argc,char * argv [])
 {
     /* 
-    ** Alpha 65-90 compris
-    ** Numerique 48-57 compris
+    ** Application Brute-force / Binaire client
+    ** ----------------------------------------
+    ** Quelques modifications à effectuer pour gérer les
+    **  memory leak et les valeurs de retour du binaire
     */
     /*
-    ** On recoit 2 plage type AAAA BBBB
+    ** 3 arguments : 
+    ** -------------
+    ** - Première plage ex : AAAAAA
+    ** - Fin de la plage ex : FFFFFF sachant que AAAAAA < AAAAAF
+    ** - Mot de passe réel
+    ** 
     */
 
     if(argc==4)
