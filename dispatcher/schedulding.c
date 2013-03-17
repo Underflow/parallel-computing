@@ -16,7 +16,7 @@ task generate_task(int id)
     char* str = calloc(100, 1);
     static int note = 0;
 
-    sprintf(str,
+    /*sprintf(str,
             //"usleep $(( $((%lu - `date +%%s`))  ));"
             //"echo `date +%%s` -- %u;"
             "echo '\x1b[10;%d]\x1B[11;%d]\a' >> /dev/null;"
@@ -25,7 +25,8 @@ task generate_task(int id)
             //wait[note] + start * 1000UL,
             freqs[note].freq,
             freqs[note].len);
-    note = (note + 1) % (sizeof (freqs) / sizeof (freqs[0]));
+    note = (note + 1) % (sizeof (freqs) / sizeof (freqs[0]));*/
+
     t->id = id;
     t->task = str;
     return t;

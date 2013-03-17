@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+static const char MAX_CAR=8;
+
 void increment_str(int* src,int size,int offset,char *dictionary,size_t size_dic)
 {   
     size_t j = offset;
@@ -14,7 +17,7 @@ void increment_str(int* src,int size,int offset,char *dictionary,size_t size_dic
     {
         j++;
         *(src + i) = 0;
-        
+
         increment_str(src,size,j,dictionary,size_dic);
     }
     else
@@ -24,15 +27,15 @@ void increment_str(int* src,int size,int offset,char *dictionary,size_t size_dic
 
 int compareString(int* str_1,int* str_2,int size)
 {
-        size_t i;
-        for(i=0;i<size;i++)
+    size_t i;
+    for(i=0;i<size;i++)
+    {
+        if(str_1[i] != str_2[i])
         {
-            if(str_1[i] != str_2[i])
-            {
-                return 0;
-            }
+            return 0;
         }
-        return 1;
+    }
+    return 1;
 }
 
 void add_Dictionary(int ascii_begin,int ascii_end,char *dictionary)
@@ -52,38 +55,54 @@ int findKey(char searsch,char *dictionary)
         if(*(dictionary + i) == searsch)
             return i;
     }
-    return 0;
+    return -1;
 }
 
 void char_to_int(char *src,int *dst,char *dictionary)
 {
-    size_t i;
-    for(i=0;i<strlen(src);i++)
+        size_t i=MAX_CAR;
+    while(i!=-1)
     {
-        *(dst + i) = findKey(*(src + i),dictionary); 
+        if(i>strlen(src))
+        {
+            *(dst + MAX_CAR -i)= -1;
+        }
+        else
+        *(dst + MAX_CAR -1- i) = findKey(*(src + i),dictionary); 
+
+        i--;
     }
 }
 
-void char_to_int_plg1(char *plg1,char *plg2,int *dst,char *dictionary)
+void parse_plg(char *src,int *dst,int size)
 {
-    if(strlen(plg1) < strlen(plg2))
-    {
-        size_t i;
-        for(i=0;i<strlen(plg2)-strlen(plg1);i++)
+    size_t i,j;
+    size_t begin= 0;
+    size_t end=0;
+    size_t dst_i = size -1;
+
+    for(i=0;i<size;i++)
+        *(dst + i) = -1;
+
+    j=strlen(src);
+    while(j!=-1)
+    {  
+        if(src[j] == ']' )
         {
-            *(dst +i) = -1;
+            end=j;
         }
-        for(i=strlen(plg2)-strlen(plg1);i<=strlen(plg2);i++)
+        else if(src[j] == '[')
         {
-            *(dst + i) = findKey(*(plg1 + i),dictionary);
+            char *aux=malloc(2);
+            begin=j;
+            strncpy(aux,src + begin +1  ,end-begin-1);
+            *(dst+dst_i) = atoi(aux);
+            dst_i--;
+            free(aux);
         }
-    }
-    else
-    {
-        char_to_int(plg1,dst,dictionary);
+        j=j-1;
     }
 }
-
 int main(int argc,char * argv [])
 {
     /* 
@@ -104,26 +123,27 @@ int main(int argc,char * argv [])
 
     if(argc==4)
     {
-        int *plg_2 = malloc(sizeof(int) * strlen(argv[2]));
-        int *real_pwd = malloc(sizeof(int) * strlen(argv[3]));
-        int *try_found = malloc(sizeof(int) * strlen(argv[2]));
+        int *plg_2 = malloc(sizeof(int) * MAX_CAR);
+        int *real_pwd = malloc(sizeof(int) * MAX_CAR);
+        int *try_found = malloc(sizeof(int) * MAX_CAR);
         char *Dictionary= malloc(126-33);
 
-        size_t size_plg = strlen(argv[2]);
-        size_t size_dic = strlen(Dictionary)
+        size_t size_plg = MAX_CAR;
         add_Dictionary(33,126,Dictionary);
-        
-        char_to_int(argv[2],plg_2,Dictionary);
-        char_to_int(argv[3],real_pwd,Dictionary);
-        char_to_int_plg1(argv[1],argv[2],try_found,Dictionary);
+        size_t size_dic = strlen(Dictionary);
 
-        while(compareString(try_found,plg_2,size_plg) != 1 && compareString(try_found,real_pwd,size_plg)!= 1)
-            increment_str(try_found,size_plg,0,Dictionary,size_dic);
-        if(compareString(try_found,real_pwd,size_plg) == 1)
-            printf("1");
-        else
-            printf("0");
+        char_to_int(argv[3],real_pwd,Dictionary);
+        parse_plg(argv[1],try_found,size_plg);
+        parse_plg(argv[2],plg_2,size_plg);
+       
+          while(compareString(try_found,plg_2,size_plg) != 1 && compareString(try_found,real_pwd,size_plg)!= 1)
+           increment_str(try_found,size_plg,0,Dictionary,size_dic);
+           if(compareString(try_found,real_pwd,size_plg) == 1)
+           printf("1");
+           else
+           printf("0");
 
     }
+
     return 0;
 }
