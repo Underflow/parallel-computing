@@ -13,6 +13,8 @@
 #include <string.h>
 #include <signal.h>
 
+#include "hashtab.h"
+#include "uthash.h"
 #include "packet.h"
 #include "task_list.h"
 #include "server.h"
@@ -24,14 +26,18 @@ static const int PORT = 4242;
 //#include "notes.def"
 //};
 
+
 int main()
 {
     struct event_base *base;
     struct evconnlistener *listener;
     struct event *signal_event;
     struct sockaddr_in sin;
+    pargs arg_event;
 
-    task_list tlist = init_tasks(100, 0);
+    arg_event=malloc(sizeof(struct args));
+    arg_event->tlist = init_tasks(1000, 0);
+    arg_event->h = NULL; // Ne pas modifier, indispensable
 
 
     base = event_base_new();
@@ -44,7 +50,7 @@ int main()
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
 
-    listener = evconnlistener_new_bind(base, listener_connection_event, tlist,
+    listener = evconnlistener_new_bind(base, listener_connection_event, (void*)arg_event,
                                        LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
                                        (struct sockaddr*)&sin,
                                        sizeof(sin));
@@ -67,7 +73,7 @@ int main()
     event_free(signal_event);
     event_base_free(base);
 
-    free_tlist(tlist);
+    free_tlist(arg_event->tlist);
 
     return 0;
 }
@@ -78,13 +84,19 @@ int main()
 void handle_packet(struct mlc_packet_header header, 
                    char* data,
                    struct bufferevent *bev,
-                   task_list tlist)
+                   pargs arg)
 {
     task t;
     switch (header.opcode)
     {
         case 1:
             {
+                if(return_task_from_link(&(arg->h),header.client_id) == -1)
+                {
+                    t = next_tlist(arg->tlist);
+                    add_new_link(&(arg->h),header.client_id,t->id);
+                    send_packet(header.cluster_id, 2,t->task,strlen(t->task),bev);
+                }
                 /*struct timeval  tv;
                   gettimeofday(&tv, NULL);
 
@@ -106,7 +118,7 @@ void handle_packet(struct mlc_packet_header header,
                   send_packet(header.cluster_id, 2, NULL, 0, bev);*/
 
 
-                
+
             }
 
 
@@ -119,17 +131,27 @@ void handle_packet(struct mlc_packet_header header,
                client_id
                */
             break;
-        case 2:
+                case 2:
             perror("Error : this opcode is not implemented");
-        case 3:
+            break;
+                case 3:
             if(strlen(data))
-                printf("Received result : %s", data);
+            {
+                printf("Received result : %s\n", data);
+                int result=atoi(data);
+                if(result==1)
+                {
+               system("pkill dispatcher");
+                }
+            end_task(return_task_from_link(&(arg->h),header.client_id),arg->tlist);
+            delete_link(&(arg->h),header.client_id);
 
+            }
             break;
-        default:
+                default:
             break;
+            }
     }
-}
 
 
     /*
@@ -154,6 +176,7 @@ void handle_packet(struct mlc_packet_header header,
         }
         bufferevent_setcb(bev, read_event, NULL, client_connection_event, user_data);
         bufferevent_enable(bev, EV_READ);
+
     }
 
 
@@ -165,9 +188,6 @@ void handle_packet(struct mlc_packet_header header,
     */
     void read_event(struct bufferevent *bev, void *user_data)
     {
-
-        task_list tlist = (task_list)user_data;
-
         struct evbuffer *buffer = bufferevent_get_input(bev);
 
         // On regarde si on a reçu au moins le header
@@ -188,7 +208,7 @@ void handle_packet(struct mlc_packet_header header,
                 // On extrait les données du buffer
                 evbuffer_remove(buffer, (void*)data, data_size); 
                 // On traite le packet reçu, complet
-                handle_packet(header, data, bev, tlist);
+                handle_packet(header, data, bev, (pargs)user_data);
                 free(data);
             }
             else

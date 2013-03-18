@@ -1,3 +1,4 @@
+#define _BSD_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,15 +30,25 @@ struct string_packet
 
 int sock = 0;
 
+
+double set_clientid()
+{
+    FILE *f=popen("ifconfig -a | grep -woE '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'","r");
+    char *str=malloc(17);
+    fgets(str,17,f);
+    double* a = (double*)str;
+    pclose(f);
+    return *a;
+}
+
 void send_packet(uint8_t cluster_id,
-                  double client_id,
                   uint8_t opcode,
                   char *data,
                   int size_of,
                   int sock) 
 {
     struct mlc_packet_header header;
-    header.client_id = client_id;
+    header.client_id = set_clientid();
     header.opcode = opcode;
     header.cluster_id = cluster_id;
     header.size_of = sizeof(struct mlc_packet_header) + size_of;
@@ -63,9 +74,8 @@ void proceed_task(struct mlc_packet_header *header,char *buffer)
     char *str = calloc(1, 1024);
     fread(str, 1, 1024, f);
     pclose(f);
-    printf("%s\n",buffer);
     printf(str);
-    send_packet(1, 1, 3, str, strlen(str), sock);
+    send_packet(1, 3, str, strlen(str), sock);
     //free(str);
     //free(animfile);
 }
@@ -199,7 +209,7 @@ int main(int argc , char *argv[])
     while(1)
     {
 
-        send_packet(1, 1, 1, NULL, 0, sock);
+        send_packet(1, 1, NULL, 0, sock);
         rec_buffer(sock);
     }
 

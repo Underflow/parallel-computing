@@ -3,19 +3,27 @@
 #include "task_list.h"
 #define _BSD_SOURCE
 #include <unistd.h>
+#include <string.h>
 #include <sys/time.h>
 #include <time.h>
+#include "brute_force.h"
 
+
+/*
 struct { int freq; int len; unsigned long delay; } freqs[] = {
 #include "notes.def"
 };
+*/
 
 task generate_task(int id)
 {
     task t = malloc(sizeof(struct s_task));
-    char* str = calloc(100, 1);
-    static int note = 0;
-
+    char* str = malloc(1024);
+    //static int note = 0;
+    char* plg = generate_new_plg(300000);
+    strcpy(str,"./application/bruteforce ");
+    strcat(str, plg);
+    printf("%s\n",str);
     /*sprintf(str,
             //"usleep $(( $((%lu - `date +%%s`))  ));"
             //"echo `date +%%s` -- %u;"
@@ -53,6 +61,7 @@ void free_tlist(task_list l)
 
 task_list init_tasks(int size, int start)
 {
+    init_bf(8,"TESW");
     task_list tlist = malloc(sizeof(struct task_list));
     init_tlist(tlist, size);
 

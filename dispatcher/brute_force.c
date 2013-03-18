@@ -10,11 +10,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "brute_force.h"
 
 static const int BASE=93;
-static int* act_plg;
-static int* max_plg;
-static int MAX_CAR;
 static char* mdp;
 
 /* 
@@ -80,14 +78,31 @@ void add(int b)
             }
             else if(*(act_plg + i) == -1 && *(conversion + i) > -1)
             {
-                *(act_plg + i) = *(conversion + i) + retenue;
+                int somme= *(conversion +i) + retenue;
                 retenue=0;
+                if(somme > BASE)
+                {
+                    retenue=somme/BASE;
+                *(act_plg + i) = somme -retenue*BASE;
+                }
+                else
+                {
+                    *(act_plg +i) = somme;
+                }
             }
             else if(*(conversion + i) == -1 && *(act_plg + i) > -1)
             {
-                if(retenue)
-                    *(act_plg + i) += retenue;
-                break;
+                int somme= *(act_plg + i) + retenue;
+                retenue=0;
+                if(somme > BASE)
+                {
+                    retenue=somme/BASE;
+                    *(act_plg + i) = somme - retenue*BASE;
+                }
+                else
+                {
+                    *(act_plg + i) = somme;
+                }
 
             }
             else if(*(conversion + i) > -1 && *(act_plg + i) > -1)
@@ -133,6 +148,8 @@ char* generate_new_plg(int calcul)
         char aux[2];
         sprintf(aux,"[%d]",*(begin + i));
         strcat(str,aux);
+        aux[0]='\0';
+        aux[1]='\0';
     }
 
     strcat(str," ");
@@ -142,6 +159,8 @@ char* generate_new_plg(int calcul)
         char aux[2];
         sprintf(aux,"[%d]",*(end + i));
         strcat(str,aux);
+        aux[0]='\0';
+        aux[1]='\0';
     }
     strcat(str," ");
     strcat(str,mdp);

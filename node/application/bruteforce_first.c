@@ -21,7 +21,7 @@ void increment_str(int* src,int size,int offset,char *dictionary,size_t size_dic
         increment_str(src,size,j,dictionary,size_dic);
     }
     else
-        *(src + i) = src[i] + 1;
+        *(src + i) = *(src + i) + 1;
 
 }
 
@@ -60,7 +60,7 @@ int findKey(char searsch,char *dictionary)
 
 void char_to_int(char *src,int *dst,char *dictionary)
 {
-        size_t i=MAX_CAR;
+    size_t i=MAX_CAR;
     while(i!=-1)
     {
         if(i>strlen(src))
@@ -68,7 +68,7 @@ void char_to_int(char *src,int *dst,char *dictionary)
             *(dst + MAX_CAR -i)= -1;
         }
         else
-        *(dst + MAX_CAR -1- i) = findKey(*(src + i),dictionary); 
+            *(dst + MAX_CAR -1- i) = findKey(*(src + i),dictionary); 
 
         i--;
     }
@@ -130,18 +130,35 @@ int main(int argc,char * argv [])
 
         size_t size_plg = MAX_CAR;
         add_Dictionary(33,126,Dictionary);
-        size_t size_dic = strlen(Dictionary);
+        size_t size_dic = 94;
 
         char_to_int(argv[3],real_pwd,Dictionary);
         parse_plg(argv[1],try_found,size_plg);
         parse_plg(argv[2],plg_2,size_plg);
-       
-          while(compareString(try_found,plg_2,size_plg) != 1 && compareString(try_found,real_pwd,size_plg)!= 1)
-           increment_str(try_found,size_plg,0,Dictionary,size_dic);
-           if(compareString(try_found,real_pwd,size_plg) == 1)
-           printf("1");
-           else
-           printf("0");
+
+        while(compareString(try_found,plg_2,size_plg) != 1 && compareString(try_found,real_pwd,size_plg)!= 1)
+        {
+            increment_str(try_found,size_plg,0,Dictionary,size_dic);
+            /*printf("\nReal\n");
+        for(size_t i=0;i<8;i++)
+        {
+            printf("[%d]",*(real_pwd + i));
+        }
+        printf("\n");
+        printf("Try\n");
+        for(size_t i=0;i<8;i++)
+        {
+            printf("[%d]",*(try_found + i));
+        }*/
+
+              }
+
+        if(compareString(try_found,real_pwd,size_plg) == 1)
+        {
+            printf("1");
+        }
+        else
+            printf("0");
 
     }
 
