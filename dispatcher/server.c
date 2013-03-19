@@ -27,7 +27,7 @@ static const int PORT = 4242;
 //};
 
 
-int main()
+int main(int argc,char * argv[])
 {
     struct event_base *base;
     struct evconnlistener *listener;
@@ -36,7 +36,10 @@ int main()
     pargs arg_event;
 
     arg_event=malloc(sizeof(struct args));
-    arg_event->tlist = init_tasks(100, 0);
+    if(argc==2)
+    arg_event->tlist = init_tasks(100, 0,argv[1]);
+    else
+    arg_event->tlist = init_tasks(100, 0,"TEST");
     arg_event->h = NULL; // Ne pas modifier, indispensable
 
 

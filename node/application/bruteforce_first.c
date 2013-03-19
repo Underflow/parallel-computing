@@ -155,7 +155,11 @@ int main(int argc,char * argv [])
 
         if(compareString(try_found,real_pwd,size_plg) == 1)
         {
-            printf("1");
+            char *str=malloc(1024);
+            strcpy(str,"1 ");
+            strcat(str,argv[3]);
+            str=realloc(str,2 +  strlen(argv[3]));
+            printf("%s",str);
         }
         else
             printf("0");

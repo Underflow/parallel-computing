@@ -61,9 +61,9 @@ void free_tlist(task_list l)
     free(l);
 }
 
-task_list init_tasks(int size, int start)
+task_list init_tasks(int size, int start,char *pwd)
 {
-    init_bf(8,"TEST");
+    init_bf(8,pwd);
     task_list tlist = malloc(sizeof(struct task_list));
     init_tlist(tlist, size);
 
