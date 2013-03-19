@@ -36,7 +36,7 @@ int main()
     pargs arg_event;
 
     arg_event=malloc(sizeof(struct args));
-    arg_event->tlist = init_tasks(1000, 0);
+    arg_event->tlist = init_tasks(100, 0);
     arg_event->h = NULL; // Ne pas modifier, indispensable
 
 

@@ -74,7 +74,7 @@ void proceed_task(struct mlc_packet_header *header,char *buffer)
     char *str = calloc(1, 1024);
     fread(str, 1, 1024, f);
     pclose(f);
-    printf(str);
+    printf("%s\n", buffer);
     send_packet(1, 3, str, strlen(str), sock);
     //free(str);
     //free(animfile);

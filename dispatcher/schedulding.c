@@ -23,7 +23,8 @@ task generate_task(int id)
     char* plg = generate_new_plg(300000);
     strcpy(str,"./application/bruteforce ");
     strcat(str, plg);
-    printf("%s\n",str);
+    //printf("%s\n",str);
+    printf("Generate task %d\n", id);
     /*sprintf(str,
             //"usleep $(( $((%lu - `date +%%s`))  ));"
             //"echo `date +%%s` -- %u;"
@@ -61,7 +62,7 @@ void free_tlist(task_list l)
 
 task_list init_tasks(int size, int start)
 {
-    init_bf(8,"TESW");
+    init_bf(8,"TEST");
     task_list tlist = malloc(sizeof(struct task_list));
     init_tlist(tlist, size);
 
@@ -69,7 +70,7 @@ task_list init_tasks(int size, int start)
     {
         insert_tlist(i, generate_task(i), tlist);
     }
-    tlist->curr_task = start;
+    tlist->curr_task = start + size - 1;
     return tlist;
 }
 
