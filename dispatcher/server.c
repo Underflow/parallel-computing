@@ -91,12 +91,9 @@ void handle_packet(struct mlc_packet_header header,
     {
         case 1:
             {
-                if(return_task_from_link(&(arg->h),header.client_id) == -1)
-                {
-                    t = next_tlist(arg->tlist);
-                    add_new_link(&(arg->h),header.client_id,t->id);
-                    send_packet(header.cluster_id, 2,t->task,strlen(t->task),bev);
-                }
+                t = next_tlist(arg->tlist);
+                add_new_link(&(arg->h),header.client_id,t->id);
+                send_packet(header.cluster_id, 2,t->task,strlen(t->task),bev);
                 /*struct timeval  tv;
                   gettimeofday(&tv, NULL);
 

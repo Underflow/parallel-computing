@@ -19,10 +19,11 @@ task generate_task(int id)
 {
     task t = malloc(sizeof(struct s_task));
     char* str = malloc(1024);
+    sprintf(str, "echo Tache %d", id);
     //static int note = 0;
-    char* plg = generate_new_plg(300000);
-    strcpy(str,"./application/bruteforce ");
-    strcat(str, plg);
+    //char* plg = generate_new_plg(300000);
+    //strcpy(str,"./application/bruteforce ");
+    //strcat(str, plg);
     //printf("%s\n",str);
     printf("Generate task %d\n", id);
     /*sprintf(str,
