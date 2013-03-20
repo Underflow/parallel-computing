@@ -1,0 +1,13 @@
+number a = a + [3]
+
+test a b =
+    let a = 3 in
+        3
+    end if
+
+prout a b =
+    let a = 3 in
+        [a + 3, b, [3]]
+    end
+
+
