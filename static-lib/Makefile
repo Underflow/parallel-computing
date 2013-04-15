@@ -3,7 +3,7 @@ CFLAGS = -g -Wall -std=c99
 
 SRC = $(wildcard *.c)
 OBJS = $(SRC:.c=.o)
-AOUT = test
+AOUT = dispatcher
 LDLIBS = -levent
 
 LIBS = lib
