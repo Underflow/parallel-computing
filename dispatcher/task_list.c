@@ -4,6 +4,7 @@
 
 #include "task_list.h"
 
+
 //Initialise the list
 void init_tlist(task_list l, int size)
 {
@@ -50,6 +51,7 @@ task next_tlist(task_list l)
         l->curr_pos = (l->curr_pos + 1)%(l->size);
     }
     while(l->tasks[l->curr_pos] == NULL);
+
     return l->tasks[l->curr_pos];
 }
 
@@ -62,7 +64,8 @@ void delete_tlist(int pos, task_list l)
 
 //Replaces data with new_data in the list l
 void replace_tlist(int pos, task tsk, task_list l)
-{ 
+{
     if(pos < l->size && pos >= 0)
         l->tasks[pos] = tsk;
 }
+

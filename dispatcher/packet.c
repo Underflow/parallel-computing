@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <event2/bufferevent.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "packet.h"
-
 
 /*
 ** Cette fonction génère le packet.
@@ -26,3 +26,4 @@ void send_packet(uint8_t cluster_id,
     if(size_of)
         bufferevent_write(bev, data, size_of);
 }
+

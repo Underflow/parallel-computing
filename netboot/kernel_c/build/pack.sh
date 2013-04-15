@@ -21,3 +21,5 @@ cd ..
 cp extract/cluster.iso .
 sudo rm -rf extract
 echo "cluster.iso has been packed"
+sudo cp cluster.iso /mnt/pxeiso
+echo "cluster.iso has been set in /mnt/pxeiso"

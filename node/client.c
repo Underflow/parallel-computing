@@ -1,3 +1,4 @@
+#define _BSD_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,54 +28,56 @@ struct string_packet
     char *buffer;
 };
 
+int sock = 0;
 
-struct mlc_packet_header create_packet(double client_id,uint8_t cluster_id,uint8_t opcode,char *data)
+
+double set_clientid()
 {
-	struct mlc_packet_header header;
-	header.client_id=client_id;
-	header.cluster_id=cluster_id;
-	header.opcode=opcode;
-	header.size_of= strlen(data) + sizeof(struct mlc_packet_header);
+    FILE *f=popen("ifconfig -a | grep -woE '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'","r");
+    char *str=malloc(17);
+    fgets(str,17,f);
+    double* a = (double*)str;
+    pclose(f);
+    return *a;
+}
 
-	return header;
-}	
+void send_packet(uint8_t cluster_id,
+                  uint8_t opcode,
+                  char *data,
+                  int size_of,
+                  int sock) 
+{
+    struct mlc_packet_header header;
+    header.client_id = set_clientid();
+    header.opcode = opcode;
+    header.cluster_id = cluster_id;
+    header.size_of = sizeof(struct mlc_packet_header) + size_of;
+
+    send(sock, (char*)&header, sizeof(struct mlc_packet_header), 0);
+    if(size_of > 0)
+        send(sock, data, size_of, 0);
+}
 
 void proceed_task(struct mlc_packet_header *header,char *buffer)
 {
     // Decoupe du data et cast en char*
-
-    printf("Traitement ...\n");
-    // Affichage de la struct
-    printf("Client_id : %f\n",header->client_id);
-    /*printf("Cluster_id : %d\n",header->cluster_id);
-    printf("Opcode : %d\n",header->opcode);
-    printf("Size_of : %d\n",header->size_of);
-
-    // Affichage de la data;
-    printf("Data : %s\n\n",buffer);*/
-    FILE *file;
-    char buf[100];
-    int command_return;
-    switch(header->opcode)
-	{
-		case 2:
-		    file = popen(buffer, "r");
-		    if (file == NULL)
-		    {
-			perror("popen");
-			exit(1);
-		    }
-		    while (fgets(buf, sizeof(buf), file))
-		    {
-			printf("%s", buf);
-		    }
-		    command_return = pclose(file);
-		    sprintf(buffer, "%d", command_return);
-		    break;
-		default:
-		    ;
-	}
-   printf("%s\n", buffer);
+    //if(strlen(buffer))
+    //    printf("/bin/sh %s\n", buffer);
+    // static int frame = 0;
+    //frame = (frame + 1)%6+1;
+    
+    //char* animfile = calloc(1, 50);
+    //system("clear");
+    //sprintf(animfile, "cat anim/%d", frame);
+    //system(animfile);
+    FILE *f = popen(buffer, "r");
+    char *str = calloc(1, 1024);
+    fread(str, 1, 1024, f);
+    pclose(f);
+    printf("%s\n", buffer);
+    send_packet(1, 3, str, strlen(str), sock);
+    //free(str);
+    //free(animfile);
 }
 
 
@@ -102,6 +105,7 @@ struct string_packet drain_buffer(struct string_packet str_p, size_t n)
         new[i] = str_p.buffer[i + n];
     str_p.buffer = new;
 
+    free(new);
     return str_p;
 }
 
@@ -115,13 +119,13 @@ char* strncpy_buffer(char *dest,const char *src,size_t n)
 
 struct string_packet check_rec(struct string_packet str_p)
 {
-    if(str_p.length >= sizeof(struct mlc_packet_header))
+    while(str_p.length >= sizeof(struct mlc_packet_header))
     {
         struct mlc_packet_header *header;
 
         char *header_str=malloc(sizeof(struct mlc_packet_header));
         header_str = strncpy_buffer(header_str,str_p.buffer,sizeof(struct mlc_packet_header));
-        
+
         header = (struct mlc_packet_header*)header_str;
         if(str_p.length >= header->size_of)
         {
@@ -131,15 +135,17 @@ struct string_packet check_rec(struct string_packet str_p)
             str_p = drain_buffer(str_p,header->size_of);
             str_p.length -= header->size_of;
             proceed_task(header,data);
+            free(data);
         }
+        free(header_str);
     }
-        return str_p;
+    return str_p;
 }
 
 void rec_buffer(int socket)
 {
     // Buffer du recv
-    char *buffer=malloc(1024);
+    char buffer[1024];
 
     // Packet entier
     struct string_packet str_p;
@@ -149,13 +155,14 @@ void rec_buffer(int socket)
 
     int length=0;
 
-    while((length = recv(socket,buffer,1024,0))>0) 
+    while((length = recv(socket,buffer,1024,0))>0)
     {
         str_p = append_buffer(str_p,length,buffer);
         str_p = check_rec(str_p);
         if(str_p.length <= 0)
             break;
     }
+
 
 
 }
@@ -179,7 +186,6 @@ int main(int argc , char *argv[])
     char *server_ip = argv[1];
     int server_port = 4242;
 
-    int sock;
     char buffer_ask[1024];
 
     struct sockaddr_in server;
@@ -198,23 +204,12 @@ int main(int argc , char *argv[])
         return 0;
     }
 
-
-    // La structure ainsi que la data pour demander une tâche est
-    // constamment la même, ici c'est un test qui est fait
-
-    
-    strcpy(buffer_ask, "blablabla");
-    header = create_packet(1,2,1,buffer_ask);
-
     // Boucle tant que 1, à l'avenir paramètre à changer jusqu'à ce qu'il
     // recoive l'odre de s'arreter. 
     while(1)
     {
-        sleep(2);
 
-        printf("Demande de tâches ...\n");
-        send(sock, (char*)&header, sizeof(struct mlc_packet_header), 0);
-        send(sock, buffer_ask, strlen(buffer_ask), 0);
+        send_packet(1, 1, NULL, 0, sock);
         rec_buffer(sock);
     }
 

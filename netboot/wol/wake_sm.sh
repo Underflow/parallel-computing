@@ -11,7 +11,7 @@ for sm in "$@"; do
             name=`echo $machine | cut -d':' -f1 | tr -d ' '`
             mac=`echo $machine | cut -d':' -f2- | tr -d ' '`
             echo -n "[$sm] $name : "
-            wakeonlan $mac
+            etherwake $mac -i eth30
         done < macs/$sm.txt
     else
         echo "SM $sm has not been mapped yet."
