@@ -5,7 +5,7 @@
 #define KEY_ESCAPE  27
 #define KEY_Y       121
 #define KEY_N       110
-#define NODE_NLEN   7 // strlen("r00p00 ")
+#define NODE_NLEN   7 // strlen("r00p00\s")
 
 struct TaskBarItem {
     int         index,
@@ -18,10 +18,14 @@ struct TaskBarItem {
 struct Node {
     int         r,
                 p,
+                room,
                 online;
 };
 
 int _C = 1; // if != 0 => refresh()
+
+int _Rooms[6];
+int _CurrentRoom;
 
 struct Node _Nodes[30];
 
@@ -74,59 +78,74 @@ void task_overview(WINDOW *win)
     // Temp
     _Nodes[0].r = 1;
     _Nodes[0].p = 1;
+    _Nodes[0].room = 304;
     _Nodes[0].online = 1;
 
     _Nodes[1].r = 1;
     _Nodes[1].p = 2;
+    _Nodes[1].room = 304;
     _Nodes[1].online = 1;
 
     _Nodes[2].r = 1;
     _Nodes[2].p = 3;
+    _Nodes[2].room = 304;
     _Nodes[2].online = 0;
 
     _Nodes[3].r = 1;
     _Nodes[3].p = 4;
+    _Nodes[3].room = 304;
     _Nodes[3].online = 1;
 
     _Nodes[4].r = 1;
-    _Nodes[4].p = 5;
+    _Nodes[4].p = 1;
+    _Nodes[4].room = 306;
     _Nodes[4].online = 1;
 
     _Nodes[5].r = 2;
     _Nodes[5].p = 1;
+    _Nodes[5].room = 304;
     _Nodes[5].online = 1;
 
     _Nodes[6].r = 2;
     _Nodes[6].p = 2;
+    _Nodes[6].room = 304;
     _Nodes[6].online = 1;
 
-    _Nodes[7].r = 2;
-    _Nodes[7].p = 3;
+    _Nodes[7].r = 1;
+    _Nodes[7].p = 2;
+    _Nodes[7].room = 306;
     _Nodes[7].online = 1;
 
     _Nodes[8].r = 3;
     _Nodes[8].p = 1;
+    _Nodes[8].room = 304;
     _Nodes[8].online = 0;
 
     _Nodes[9].r = 3;
     _Nodes[9].p = 2;
+    _Nodes[9].room = 304;
     _Nodes[9].online = 1;
 
     _Nodes[10].r = 3;
     _Nodes[10].p = 3;
+    _Nodes[10].room = 304;
     _Nodes[10].online = 1;
 
-    _Nodes[11].r = 3;
-    _Nodes[11].p = 4;
+    _Nodes[11].r = 2;
+    _Nodes[11].p = 1;
+    _Nodes[11].room = 306;
     _Nodes[11].online = 1;
 
 
     wmove(win, 1, 1);
-    wprintw(win, "Nodes list. Legend: green=online, red=offline.");
+    /*wprintw(win, "Nodes list. Total: %d", sizeof(_Nodes) / sizeof(struct Node));
+    wmove(win, 3, 1);*/
+    wprintw(win, "Current room: %d. Nodes: %d.", _Rooms[_CurrentRoom],
+        sizeof(_Nodes) / sizeof(struct Node));
 
     for (int i = 0; i < sizeof(_Nodes) / sizeof(struct Node); i++)
     {
-        if (_Nodes[i].r != 0 && _Nodes[i].p != 0)
+        if (_Nodes[i].r != 0 && _Nodes[i].p != 0 && _Rooms[_CurrentRoom] == _Nodes[i].room)
         {
             wmove(win,
                 1 + 2 * _Nodes[i].r,
@@ -190,10 +209,18 @@ int main ()
     _TaskBar[2].name = "F3: About/help";
     _TaskBar[2].windows = 1;
 
+    _Rooms[0] = 301;
+    _Rooms[1] = 302;
+    _Rooms[2] = 303;
+    _Rooms[3] = 304;
+    _Rooms[4] = 305;
+    _Rooms[5] = 306;
+    _CurrentRoom = 0;
 
     ncurses = initscr();
     cdkscreen = initCDKScreen(ncurses);
     start_color();
+    initCDKColor();
     keypad(stdscr, TRUE);
     cbreak();
     noecho();
@@ -206,6 +233,9 @@ int main ()
     init_pair(4, COLOR_BLACK, COLOR_GREEN);
 
 
+    int cache_cols = COLS,
+        cache_lines = LINES;
+
     showGUI:
     while (true)
     {
@@ -215,19 +245,47 @@ int main ()
             refresh();
             draw_windows(_TaskBar[_Active - 1]);
             refresh();
+            _C = 0;
         }
 
         timeout(0);
         _Key = getch();
-        _C = 1;
         if (_Key == KEY_ESCAPE)
             break;
         else if (_Key == KEY_TAB)
+        {
+            _C = 1;
             _Active = _Active < _Tasks ? _Active + 1 : 1;
-        else
-            _C = 0;
+        }
 
-        goto showGUI;
+        // Shell
+        if (_Active == 1)
+        {
+        }
+        // Overview
+        else if (_Active == 2)
+        {
+            switch (_Key)
+            {
+                case KEY_RIGHT:
+                    if (_CurrentRoom + 1 < sizeof(_Rooms) / sizeof(int))
+                        _CurrentRoom++;
+                    _C = 1;
+                    break;
+                case KEY_LEFT:
+                    if (_CurrentRoom - 1 >= 0)
+                        _CurrentRoom--;
+                    _C = 1;
+                    break;
+            }
+        }
+
+        if (cache_cols != COLS || cache_lines != LINES)
+        {
+            _C = 1;
+            cache_cols = COLS;
+            cache_lines = LINES;
+        }
     }
 
 
