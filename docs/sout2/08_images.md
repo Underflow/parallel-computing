@@ -1,0 +1,10 @@
+\hspace*{0mm}\vfill
+\begin{center} 
+\includegraphics{images/delaro_q.jpeg} 
+\includegraphics{images/pute_ukrainienne.jpg}
+\newline
+\includegraphics{images/vermeille.jpg}
+\newline
+\includegraphics{images/boiteu_f.jpeg}
+\end{center}
+\vfill\hspace*{0mm}

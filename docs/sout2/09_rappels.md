@@ -1,5 +1,3 @@
-\newpage{}
-
 # Rappels du projet MyLittleCluster
 
 ## Le principe du projet
