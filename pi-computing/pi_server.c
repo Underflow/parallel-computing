@@ -1,16 +1,20 @@
+#include <stdint.h>
+#include <inttypes.h>
 #include "pi_server.h"
 
-char* generate_plg(int start, long long int n)
+char* generate_plg(int start, unsigned long long int n)
 {
 double h = 1.0 / (long double)n;
 char* plg = malloc(1024);
-int start_i, stop_i; 
-start_i = start*10000+1; // index du début de la somme
-stop_i = start_i + 9999; // index de la fin de la somme (ici somme de 1 à 2500000 puis de 2500001 à 5000000 etc)
+uint64_t start_i;
+uint64_t stop_i; 
+start_i = start*10000000LLU+1LLU; // index du début de la somme
+stop_i = start_i + 9999999LLU; // index de la fin de la somme (ici somme de 1 à 2500000 puis de 2500001 à 5000000 etc)
 if (stop_i <= n) // on a pas encore atteint la fin de la somme
-sprintf(plg, "%d %d %.20f", start_i, stop_i, h);
+	sprintf(plg, "%" PRId64 " %" PRId64 " %.20f", start_i, stop_i, h);
 else
-sprintf(plg, "-1"); // toutes les sous sommes ont été faites
+	return NULL;
+
 return plg;
 }
 
