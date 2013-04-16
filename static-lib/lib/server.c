@@ -25,7 +25,7 @@ static const int PORT = 4242;
 void* tsk_gen_ptr;
 void* get_result_ptr;
 
-typedef void(*fvoidptr)(int, char*);
+typedef void(*fvoidptr)(int, double, int, char*);
 
 void init(void* tsk_gen, void* get_reslt)
 {
@@ -103,7 +103,7 @@ void handle_packet(struct mlc_packet_header header,
                 {
                     fvoidptr get_result_fun = (fvoidptr)get_result_ptr;
                     int tid = return_task_from_link(&(arg->h), header.client_id);
-                    get_result_fun(tid, data);
+                    get_result_fun(tid, header.client_id, header.size_of - sizeof(struct mlc_packet_header), data);
                     end_task(tid,arg->tlist);
                     delete_link(&(arg->h),header.client_id);
                 }
