@@ -9,7 +9,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <event.h>
-
+#include <sys/ioctl.h>
+#include <net/if.h>   //ifreq
 
 // Send DATA Model
 struct mlc_packet_header
@@ -30,15 +31,23 @@ struct string_packet
 
 int sock = 0;
 
-
-double set_clientid()
+double get_hwaddr(char *name)
 {
-    FILE *f=popen("ifconfig -a | grep -woE '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'","r");
-    char *str=malloc(17);
-    fgets(str,17,f);
-    double* a = (double*)str;
-    pclose(f);
-    return *a;
+    int fd;
+    struct ifreq ifr;
+    unsigned char *mac = calloc(8,1);
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name , name , IFNAMSIZ-1);
+
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+
+    close(fd);
+
+    mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+    return *(double*)mac;
 }
 
 void send_packet(uint8_t cluster_id,
@@ -48,7 +57,7 @@ void send_packet(uint8_t cluster_id,
                   int sock) 
 {
     struct mlc_packet_header header;
-    header.client_id = set_clientid();
+    header.client_id = get_hwaddr("eth0");
     header.opcode = opcode;
     header.cluster_id = cluster_id;
     header.size_of = sizeof(struct mlc_packet_header) + size_of;
@@ -60,24 +69,12 @@ void send_packet(uint8_t cluster_id,
 
 void proceed_task(struct mlc_packet_header *header,char *buffer)
 {
-    // Decoupe du data et cast en char*
-    //if(strlen(buffer))
-    //    printf("/bin/sh %s\n", buffer);
-    // static int frame = 0;
-    //frame = (frame + 1)%6+1;
-    
-    //char* animfile = calloc(1, 50);
-    //system("clear");
-    //sprintf(animfile, "cat anim/%d", frame);
-    //system(animfile);
     FILE *f = popen(buffer, "r");
     char *str = calloc(1, 1024);
     fread(str, 1, 1024, f);
     pclose(f);
     printf("%s\n", buffer);
     send_packet(1, 3, str, strlen(str), sock);
-    //free(str);
-    //free(animfile);
 }
 
 
