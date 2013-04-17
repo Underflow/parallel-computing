@@ -27,9 +27,17 @@ void* get_result_ptr;
 
 typedef void(*fvoidptr)(int, double, int, char*);
 
+struct event_base *base;
+
+void quit()
+{
+    struct timeval delay = { 0, 0 };
+    printf("Exiting server : 2 sec.\n");
+    event_base_loopexit(base, &delay);
+}
+
 void init(void* tsk_gen, void* get_reslt)
 {
-    struct event_base *base;
     struct evconnlistener *listener;
     struct event *signal_event;
     struct sockaddr_in sin;

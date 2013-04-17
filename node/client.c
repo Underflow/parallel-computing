@@ -11,6 +11,8 @@
 #include <event.h>
 #include <sys/ioctl.h>
 #include <net/if.h>   //ifreq
+#include <wordexp.h>
+#include <signal.h>
 
 // Send DATA Model
 struct mlc_packet_header
@@ -67,14 +69,40 @@ void send_packet(uint8_t cluster_id,
         send(sock, data, size_of, 0);
 }
 
+int my_popen(char **args)
+{
+    int fds[2];
+
+    pipe(fds);
+    pid_t pid = fork();
+    if(!pid)
+    {
+        dup2(fds[1], STDOUT_FILENO);
+        execvp(args[0], args);
+        kill(pid, SIGKILL);
+    }
+    close(fds[1]);
+    return (fds[0]);
+}
+
 void proceed_task(struct mlc_packet_header *header,char *buffer)
 {
-    FILE *f = popen(buffer, "r");
-    char *str = calloc(1, 1024);
-    fread(str, 1, 1024, f);
-    pclose(f);
-    printf("%s\n", buffer);
-    send_packet(1, 3, str, strlen(str), sock);
+    wordexp_t command;
+    wordexp(buffer, &command, 0);
+
+
+    int f = my_popen(command.we_wordv);
+
+    char *str = calloc(1, 4000000);
+    size_t total_size = 0;
+    size_t size = 0;
+    while(size = read(f, str+total_size, 1024))
+    {
+        total_size += size;
+    }
+    close(f);
+    printf("Size : %d\n", total_size);
+    send_packet(1, 3, str, total_size, sock);
 }
 
 
