@@ -5,6 +5,7 @@
 #define KEY_ESCAPE  27
 #define KEY_Y       121
 #define KEY_N       110
+#define KEY_C       99
 #define NODE_NLEN   7 // strlen("r00p00\s")
 
 struct TaskBarItem {
@@ -22,7 +23,32 @@ struct Node {
                 online;
 };
 
-int _C = 1; // if != 0 => refresh()
+int _C = 1, // if != 0 => refresh()
+    _T = 0; // if == 1 => typing
+
+char _Command[128];
+int _CommandPos = 1;
+
+/*****************************/
+char *_Flist[16];
+
+void fun_init()
+{
+    _Flist[0] = "bruteforce";
+    _Flist[1] = "mario";
+}
+
+void bruteforce()
+{
+    printf("Bruteforced!\n");
+}
+void mario()
+{
+}
+
+typedef void (*FunctionCallback)(int);
+FunctionCallback _Functions[] = {&bruteforce, &mario};
+/*****************************/
 
 int _Rooms[6];
 int _CurrentRoom;
@@ -138,9 +164,7 @@ void task_overview(WINDOW *win)
 
 
     wmove(win, 1, 1);
-    /*wprintw(win, "Nodes list. Total: %d", sizeof(_Nodes) / sizeof(struct Node));
-    wmove(win, 3, 1);*/
-    wprintw(win, "Current room: %d. Nodes: %d.", _Rooms[_CurrentRoom],
+    wprintw(win, "Current room: < %d >  Nodes: %d", _Rooms[_CurrentRoom],
         sizeof(_Nodes) / sizeof(struct Node));
 
     for (int i = 0; i < sizeof(_Nodes) / sizeof(struct Node); i++)
@@ -159,6 +183,36 @@ void task_overview(WINDOW *win)
     }
 }
 
+void task_shell(WINDOW *win)
+{
+    _Command[0] = ' ';
+    wmove(win, 1, 1);
+    if (_T == 0)
+        wprintw(win, "Type 'C' to enter a command.");
+    else
+        wprintw(win, "$%s_", _Command);
+}
+
+void parse_command()
+{
+    // Parse
+    char *tmp;
+    tmp = strtok(_Command, " ");
+    while (tmp != NULL)
+    {
+        for (int i = 0; i < sizeof(_Functions); i++)
+        {
+            if (_Flist[i] == tmp)
+                _Functions[i](i);
+        }
+        //tmp = strtok(NULL, " ");
+        break;
+    }
+    // Reset cmd
+    for (int i = 0; i < 128; i++)
+        _Command[i] = 0;
+}
+
 void draw_windows(struct TaskBarItem task)
 {
     int winwidth = COLS;
@@ -172,6 +226,9 @@ void draw_windows(struct TaskBarItem task)
 
     switch (task.index)
     {
+        case 1:
+            task_shell(task.win_left);
+            break;
         case 2:
             task_overview(task.win_left);
             break;
@@ -232,6 +289,7 @@ int main ()
     init_pair(3, COLOR_WHITE, COLOR_RED);
     init_pair(4, COLOR_BLACK, COLOR_GREEN);
 
+    fun_init();
 
     int cache_cols = COLS,
         cache_lines = LINES;
@@ -261,6 +319,27 @@ int main ()
         // Shell
         if (_Active == 1)
         {
+            if (_Key == KEY_C && _T == 0)
+            {
+                _T = 1;
+                _C = 1;
+            }
+            else if ((char)_Key == '\n')
+            {
+                _T = 0;
+                _C = 1;
+                _CommandPos = 1;
+                parse_command();
+            }
+            else if (_T == 1 && _Key != -1)
+            {
+                _C = 1;
+                if ((_Key == KEY_BACKSPACE || _Key == KEY_DC || _Key == 127)
+                    && _CommandPos > 1)
+                    _Command[--_CommandPos] = 0;
+                else
+                    _Command[_CommandPos++] = (char)_Key;
+            }
         }
         // Overview
         else if (_Active == 2)
