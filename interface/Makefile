@@ -4,7 +4,7 @@ CFLAGS = -g -Wall -std=c99
 SRC = $(wildcard *.c)
 OBJS = $(SRC:.c=.o)
 AOUT = dispatcher
-LDLIBS = -levent
+LDLIBS = -levent -lcdk -lncurses
 
 LIBS = ../static-lib/lib
 
