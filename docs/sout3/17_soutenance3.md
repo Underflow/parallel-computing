@@ -9,8 +9,7 @@ réalisé en C. L'objectif de cet algorithme est de reproduire une image, en
 utilisant uniquement des carrés de tailles et de couleurs différentes en se
 servant d'un algorithme génétique. 
 
-Un algorithme génétique
------------------------
+### Un algorithme génétique
 
 Un algorithme génétique sur la théorie de l'évolution de Darwin pour résoudre
 un problème. Il fonctionne donc sur le même principe fondamental que la
@@ -42,8 +41,7 @@ Enfin il faut une fonction de croisement (aka crossover) qui mélangera deux ADN
 
 Une fois que tout ceci est correctement codé, la magie opère toute seule, et un dessin « correct » arrive très vite à l’écran !
 
-Evolution d'une population :
-----------------------------
+### Evolution d'une population :
 
 Voici une sortie console dans laquelle est affiché un score. Ce score correspond au pourcentage de ressemblance entre l'image génétique et l'image à reproduire.
 
@@ -113,18 +111,39 @@ Generation : 910 - Bestfitness : 90.093073
 \newline
 Generation : 1810 - Bestfitness : 91.600760
 \newline
-Voici typiquement le rendu obtenu au bout de quelques minutes de calculs :
 
+### Version distribué de l'algorithme génétique :
+
+
+Pour permettre à notre algorithme génétique de distribuer les tâches aux
+différents clients, on procède en plusieurs étapes :
+
+1. Le serveur va distribuer des populations aléatoires à chaque client.
+\newline
+2. Chacun des clients va faire évoluer sa population grâce à un algorithme
+   génétique.
+\newline
+3. Au final chacun des clients a fait évoluer le génome (code génétique des  
+   individus) contenu dans les populations. Celle ci est alors retournée au
+   serveur.
+\newline
+4. Le serveur mixte les différentes populations reçues par chacun des clients.
+   Si on compare les populations générées par les clients à des continents, on
+   se rend compte que les continents possèderont une population plus
+   diversifiée évitant ainsi de tomber dans des minimums locaux.
+\newline
+
+
+
+
+Voici typiquement le rendu obtenu au bout de quelques minutes de calculs :
+\newline
 \hspace*{0mm}\vfill
 \begin{center}
 \includegraphics{images/mario.png}
 \newline
-
-Version distribué de l'algorithme génétique :
---------------------------------------------
-
 Et voici un exemple un peu plus évolué :
-
+\newline
 \includegraphics{images/genetik1.png}
 \end{center}
 \vfill\hspace*{0mm}
