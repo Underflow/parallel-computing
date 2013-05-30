@@ -32,23 +32,23 @@ Les différents mots-clés de la grammaire utilisée comporte :
 
 - Identifiants : `type "id" [ "=" exp ] ";";`
 - Entiers, flottants :
-    \par `type: "int" | "float";`
-    \par `num: float | int | bool;`
+    type: "int" | "float";
+    num: float | int | bool;
 - Opérateurs arithmétiques et comparaison :
-    affect: ["id" "="] logic; \\
-    logic: comp { ("or" | "and") low_exp } \\
-    comp: low_exp { ("<" | "==" | ">" | ">=" | "<=") low_exp } \\
-    low_exp: high_exp { ("+"|"-") high_exp }; \\
-    high_exp: pren { ("/" | "*" | "%") paren }; \\
+    affect: ["id" "="] logic;
+    logic: comp { ("or" | "and") low_exp }
+    comp: low_exp { ("<" | "==" | ">" | ">=" | "<=") low_exp }
+    low_exp: high_exp { ("+"|"-") high_exp };
+    high_exp: pren { ("/" | "*" | "%") paren };
 - Mots clés du langage :
-    term: "id" \\
-        | "num" \\
-        | funcall; \\
+    term: "id"
+        | "num"
+        | funcall;
 - Paranthèses, accolades : `proto: type "id" "(" {"type" "id" ","} ")";`
 - Conditions :
-    comp_exp: instr; \\
-        | "if" "(" exp ")" block [ "else" block ]; \\
-        | "while" "(" exp ")" block; \\
+    comp_exp: instr;
+        | "if" "(" exp ")" block [ "else" block ];
+        | "while" "(" exp ")" block;
 
 ### Parseur
 
