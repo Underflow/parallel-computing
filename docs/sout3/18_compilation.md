@@ -32,8 +32,8 @@ Les différents mots-clés de la grammaire utilisée comporte :
 
 - Identifiants : `type "id" [ "=" exp ] ";";`
 - Entiers, flottants :
-    type: "int" | "float"; \\
-    num: float | int | bool; \\
+    \par `type: "int" | "float";`
+    \par `num: float | int | bool;`
 - Opérateurs arithmétiques et comparaison :
     affect: ["id" "="] logic; \\
     logic: comp { ("or" | "and") low_exp } \\
