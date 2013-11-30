@@ -1,3 +1,0 @@
-#!/bin/sh
-fold -w78 $1 | sed s'/$//' > /dev/lp0
-echo -ne \\f > /dev/lp0
